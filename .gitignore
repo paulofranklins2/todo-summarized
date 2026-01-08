@@ -1,0 +1,58 @@
+# Compiled class files
+target/
+
+# Log files
+*.log
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+.project
+.classpath
+.settings/
+
+# Maven
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Package files
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Application properties with sensitive data
+application-*.properties
+!application.properties
+application-*.yml
+!application.yml
+
+# Lombok
+.factorypath
+
+# Spring Boot
+*.pid
+
+# JRebel
+rebel.xml
+
+# Crash logs
+hs_err_pid*
+replay_pid*
+
