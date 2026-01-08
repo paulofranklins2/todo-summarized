@@ -37,11 +37,9 @@ target/
 ehthumbs.db
 Thumbs.db
 
-# Application properties with sensitive data
-application-*.properties
-!application.properties
-application-*.yml
-!application.yml
+# Application config with sensitive data
+application-local.yml
+application-prod.yml
 
 # Lombok
 .factorypath
