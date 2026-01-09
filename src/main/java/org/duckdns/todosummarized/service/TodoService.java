@@ -63,7 +63,7 @@ public class TodoService {
      */
     @Transactional
     public void deleteTodo(UUID id) {
-        int deleted = todoRepository.deleteByIdReturningCount(id);
+        long deleted = todoRepository.deleteTodoById(id);
 
         if (deleted == 0) {
             throw new TodoNotFoundException(id);

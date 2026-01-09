@@ -264,13 +264,13 @@ class TodoServiceTest {
         void shouldDeleteTodoSuccessfully() {
             // Given
             UUID id = UUID.randomUUID();
-            when(todoRepository.deleteByIdReturningCount(id)).thenReturn(1);
+            when(todoRepository.deleteTodoById(id)).thenReturn(1L);
 
             // When
             todoService.deleteTodo(id);
 
             // Then
-            verify(todoRepository).deleteByIdReturningCount(id);
+            verify(todoRepository).deleteTodoById(id);
         }
 
         @Test
@@ -278,7 +278,7 @@ class TodoServiceTest {
         void shouldThrowWhenDeletingNonExistent() {
             // Given
             UUID id = UUID.randomUUID();
-            when(todoRepository.deleteByIdReturningCount(id)).thenReturn(0);
+            when(todoRepository.deleteTodoById(id)).thenReturn(0L);
 
             // When & Then
             TodoNotFoundException exception = assertThrows(
@@ -286,7 +286,7 @@ class TodoServiceTest {
                     () -> todoService.deleteTodo(id)
             );
             assertEquals("Todo not found with id: " + id, exception.getMessage());
-            verify(todoRepository).deleteByIdReturningCount(id);
+            verify(todoRepository).deleteTodoById(id);
         }
     }
 
