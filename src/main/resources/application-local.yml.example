@@ -5,6 +5,7 @@ spring:
     password: password
     url: jdbc:postgresql://localhost:5432/todo_db
 
+# OpenAI Configuration
 openai:
   api-key: your-openai-api-key-here
   model: gpt-4o-mini
@@ -12,3 +13,14 @@ openai:
   max-tokens: 500
   temperature: 0.7
   timeout-seconds: 30
+
+# Rate Limiting Configuration
+ratelimit:
+  enabled: true
+  ai-summary:
+    max-requests: 10
+    window-seconds: 3600
+  daily-summary:
+    max-requests: 10
+    window-seconds: 3600
+

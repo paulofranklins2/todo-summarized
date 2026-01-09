@@ -96,6 +96,12 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, "Malformed JSON request body", request);
     }
 
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleRateLimitExceeded(RateLimitExceededException ex, HttpServletRequest request) {
+        log.warn("Rate limit exceeded: {} - retry after {} seconds", ex.getMessage(), ex.getRetryAfterSeconds());
+        return buildWithRetryAfter(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage(), request, ex.getRetryAfterSeconds());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex, HttpServletRequest request) {
         log.error("Unexpected error occurred", ex);
@@ -122,5 +128,25 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(status).body(body);
+    }
+
+    private ResponseEntity<ErrorResponse> buildWithRetryAfter(
+            HttpStatus status,
+            String message,
+            HttpServletRequest request,
+            long retryAfterSeconds
+    ) {
+        ErrorResponse body = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now(clock))
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .message(message)
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(status)
+                .header("Retry-After", String.valueOf(retryAfterSeconds))
+                .header("X-RateLimit-Retry-After-Seconds", String.valueOf(retryAfterSeconds))
+                .body(body);
     }
 }

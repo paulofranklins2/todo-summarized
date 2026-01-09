@@ -13,6 +13,7 @@ import org.duckdns.todosummarized.domains.enums.SummaryType;
 import org.duckdns.todosummarized.dto.AiSummaryDTO;
 import org.duckdns.todosummarized.dto.DailySummaryDTO;
 import org.duckdns.todosummarized.dto.SummaryTypeDTO;
+import org.duckdns.todosummarized.ratelimit.RateLimit;
 import org.duckdns.todosummarized.service.AiSummaryService;
 import org.duckdns.todosummarized.service.SummaryService;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +52,12 @@ public class SummaryController {
             description = "Summary retrieved successfully",
             content = @Content(schema = @Schema(implementation = DailySummaryDTO.class))
     )
+    @ApiResponse(
+            responseCode = "429",
+            description = "Rate limit exceeded"
+    )
     @GetMapping("/daily")
+    @RateLimit(key = "daily-summary")
     public ResponseEntity<DailySummaryDTO> getDailySummary(@AuthenticationPrincipal User user) {
         DailySummaryDTO summary = summaryService.getDailySummary(user);
         return ResponseEntity.ok(summary);
@@ -71,7 +77,12 @@ public class SummaryController {
             description = "Summary retrieved successfully",
             content = @Content(schema = @Schema(implementation = AiSummaryDTO.class))
     )
+    @ApiResponse(
+            responseCode = "429",
+            description = "Rate limit exceeded"
+    )
     @GetMapping("/ai")
+    @RateLimit(key = "ai-summary")
     public ResponseEntity<AiSummaryDTO> getAiSummary(
             @AuthenticationPrincipal User user,
             @Parameter(description = "Summary type/persona", example = "DEVELOPER")

@@ -27,7 +27,7 @@ See [TODO.md](TODO.md) for detailed progress tracking.
 
 ## Tech Stack
 
-- **Java 17** with **Spring Boot 4.0.1**
+- **Java 21** with **Spring Boot 4.0.1**
 - **Spring Data JPA** with PostgreSQL
 - **Spring Security** (session-based auth + HTTP Basic for API)
 - **Thymeleaf** (dependency added for future frontend)

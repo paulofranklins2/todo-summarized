@@ -14,7 +14,6 @@
 * [x] Keep README setup instructions accurate
 * [x] Create TODO.md
 * [x] Add dependencies (Web, Validation, JPA, Security, PostgreSQL, Thymeleaf)
-* [ ] Docker Compose for Postgres (db + volume)
 * [x] Define Todo entity
 * [x] Define enums (TaskStatus, TaskPriority)
 * [ ] Flyway migration for `todos` table
@@ -25,10 +24,10 @@
 * [x] Swagger/OpenAPI documentation for all endpoints
 * [x] Validation rules (title required, max lengths, valid enums)
 * [x] Daily summary endpoint (metrics only)
-* [x] AI summary adapter (config + feature flag)
+* [x] AI summary adapter
 * [x] Metrics-only fallback if AI fails or is disabled
 * [x] Global exception handling with structured error responses
-* [ ] Integration tests (Testcontainers + repositories)
+* [ ] Integration tests
 * [x] Swagger security schemes configured
 
 ---
@@ -39,7 +38,6 @@
 * [x] TodoMapper
 * [x] Pagination for `GET /todos` (max 20 per page)
 * [x] Filtering
-
     * [x] Status
     * [x] Priority
     * [x] Due date range
@@ -50,7 +48,7 @@
 * [ ] Actuator (health, info, metrics)
 * [ ] GitHub Actions CI (build + test)
 * [ ] AI prompt versioning in response
-* [ ] Rate limiting for summary endpoint
+* [x] Rate limiting for summary endpoint
 
 ---
 
@@ -59,13 +57,13 @@
 * [ ] Simple Thymeleaf UI
 * [x] Spring Security configuration
 * [x] User registration and login endpoints
-* [x] User roles (ROLE_USER, ROLE_ADMIN)
+* [x] User roles
 * [ ] JWT authentication
 * [ ] Tags / categories
 * [ ] Weekly summary endpoint
-* [ ] Cache daily summaries (short TTL)
+* [ ] Cache daily summaries
 * [ ] CLI client or minimal frontend
-* [ ] Deploy to free hosting (Render or Fly.io)
+* [ ] Deploy to hosting
 
 ---
 
@@ -89,7 +87,7 @@
 
 ### Authentication
 
-* [x] User signup and signin
+* [x] User signup and signing
 * [x] BCrypt password encoding
 * [x] Form login
 * [x] HTTP Basic (API testing)
