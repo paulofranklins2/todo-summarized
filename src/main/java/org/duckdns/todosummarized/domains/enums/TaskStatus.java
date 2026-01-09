@@ -1,8 +1,8 @@
 package org.duckdns.todosummarized.domains.enums;
 
 public enum TaskStatus {
-    Completed,
-    InProgress,
-    NotStarted,
-    Cancelled
+    COMPLETED,
+    IN_PROGRESS,
+    NOT_STARTED,
+    CANCELLED
 }
