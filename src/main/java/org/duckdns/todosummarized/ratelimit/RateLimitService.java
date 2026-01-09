@@ -12,8 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Service for managing rate limiting per user and endpoint.
- * Implements a lightweight Token Bucket algorithm without storing Bucket instances.
- * Thread-safe implementation using ConcurrentHashMap with atomic compute operations.
  */
 @Slf4j
 @Service
@@ -27,20 +25,12 @@ public class RateLimitService {
 
     /**
      * Lightweight token bucket state storing only essential data.
-     * Immutable record for thread-safety during ConcurrentHashMap operations.
-     *
-     * @param tokens          current available tokens
-     * @param lastRefillNanos timestamp of last refill in nanoseconds
      */
     private record TokenBucketState(double tokens, long lastRefillNanos) {
     }
 
     /**
      * Result of a consumption attempt.
-     *
-     * @param consumed        whether the token was consumed
-     * @param remainingTokens remaining tokens after the operation
-     * @param nanosToWait     nanoseconds to wait before retry (0 if consumed)
      */
     public record ConsumptionResult(boolean consumed, long remainingTokens, long nanosToWait) {
     }
@@ -62,8 +52,6 @@ public class RateLimitService {
 
     /**
      * Checks if rate limiting is enabled.
-     *
-     * @return true if rate limiting is enabled
      */
     public boolean isEnabled() {
         return properties.isEnabled();
@@ -71,11 +59,6 @@ public class RateLimitService {
 
     /**
      * Attempts to consume a token for the given user and endpoint.
-     * Uses a lightweight token bucket algorithm with O(1) complexity.
-     *
-     * @param userId      the user's unique identifier
-     * @param endpointKey the endpoint key (e.g., "ai-summary")
-     * @return consumption result with success status and remaining tokens
      */
     public ConsumptionResult tryConsume(String userId, String endpointKey) {
         if (!properties.isEnabled()) {
@@ -88,7 +71,7 @@ public class RateLimitService {
         long windowNanos = (long) limit.getWindowSeconds() * 1_000_000_000L;
         double refillRatePerNano = (double) capacity / windowNanos;
 
-        // Atomic compute operation - O(1) with ConcurrentHashMap
+        // Atomic compute operation  with ConcurrentHashMap
         final ConsumptionResult[] result = new ConsumptionResult[1];
 
         bucketStates.compute(bucketKey, (key, state) -> {
@@ -126,10 +109,6 @@ public class RateLimitService {
     /**
      * Gets the remaining tokens for a user and endpoint without consuming.
      * Calculates current tokens based on elapsed time since last operation.
-     *
-     * @param userId      the user's unique identifier
-     * @param endpointKey the endpoint key
-     * @return remaining tokens, or max if no bucket exists
      */
     public long getRemainingTokens(String userId, String endpointKey) {
         if (!properties.isEnabled()) {

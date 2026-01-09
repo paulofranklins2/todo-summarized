@@ -35,7 +35,7 @@ public class JwtService {
     public JwtService(JwtProperties jwtProperties, Clock clock) {
         this.jwtProperties = jwtProperties;
         this.clock = clock;
-        // Key is computed once and cached - O(1) for subsequent operations
+        // Key is computed once and cached  for subsequent operations
         this.signingKey = Keys.hmacShaKeyFor(
                 jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8)
         );
@@ -124,6 +124,7 @@ public class JwtService {
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(signingKey)
+                .clock(() -> Date.from(clock.instant()))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

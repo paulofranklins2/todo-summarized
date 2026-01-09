@@ -46,11 +46,11 @@ class JwtServiceTest {
     }
 
     @Nested
-    @DisplayName("Token Generation - O(1)")
+    @DisplayName("Token Generation ")
     class TokenGeneration {
 
         @Test
-        @DisplayName("generateAccessToken should create valid token in O(1) time")
+        @DisplayName("generateAccessToken should create valid token")
         void generateAccessToken_ShouldCreateValidToken() {
             // Act
             String token = jwtService.generateAccessToken(testUser);
@@ -61,7 +61,7 @@ class JwtServiceTest {
         }
 
         @Test
-        @DisplayName("generateRefreshToken should create valid token in O(1) time")
+        @DisplayName("generateRefreshToken should create valid token")
         void generateRefreshToken_ShouldCreateValidToken() {
             // Act
             String token = jwtService.generateRefreshToken(testUser);
@@ -84,11 +84,11 @@ class JwtServiceTest {
     }
 
     @Nested
-    @DisplayName("Token Extraction - O(1)")
+    @DisplayName("Token Extraction ")
     class TokenExtraction {
 
         @Test
-        @DisplayName("extractUsername should return correct username in O(1) time")
+        @DisplayName("extractUsername should return correct username")
         void extractUsername_ShouldReturnCorrectUsername() {
             // Arrange
             String token = jwtService.generateAccessToken(testUser);
@@ -116,7 +116,7 @@ class JwtServiceTest {
     }
 
     @Nested
-    @DisplayName("Token Validation - O(1)")
+    @DisplayName("Token Validation ")
     class TokenValidation {
 
         @Test
@@ -200,7 +200,7 @@ class JwtServiceTest {
     }
 
     @Nested
-    @DisplayName("Role Claims - O(1)")
+    @DisplayName("Role Claims ")
     class RoleClaims {
 
         @Test

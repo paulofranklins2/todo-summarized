@@ -20,12 +20,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -80,7 +81,8 @@ class AuthControllerTest {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        userDetails = new User("test@example.com", "password123", Collections.emptyList());
+        userDetails = new User("test@example.com", "password123",
+                List.of(new SimpleGrantedAuthority("ROLE_USER")));
     }
 
     /**
