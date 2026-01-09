@@ -20,28 +20,33 @@ A backend-first Todo app that keeps the scope small while still showing real eng
 
 ```
 src/main/java/org/duckdns/todosummarized/
-├── config/              # Configuration classes (TimeConfig)
+├── config/              # Configuration classes (SecurityConfig, TimeConfig)
 ├── controller/          # REST controllers (TODO)
 ├── domains/
 │   ├── entity/          # JPA entities (Todo, User)
 │   └── enums/           # TaskStatus, TaskPriority
 ├── dto/                 # Data Transfer Objects
-│   ├── TodoMapper.java      # Entity <-> DTO mapping
-│   ├── TodoRequestDTO.java  # Input validation
-│   └── TodoResponseDTO.java # API response
+│   ├── TodoMapper.java          # Entity <-> DTO mapping
+│   ├── TodoRequestDTO.java      # Todo input validation
+│   ├── TodoResponseDTO.java     # Todo API response
+│   ├── UserRegistrationDTO.java # User registration input
+│   └── UserResponseDTO.java     # User API response
 ├── exception/           # Global exception handling
 │   ├── GlobalExceptionHandler.java
 │   ├── ErrorResponse.java
 │   ├── TodoNotFoundException.java
 │   ├── InvalidTodoException.java
-│   └── DuplicateTodoException.java
+│   ├── DuplicateTodoException.java
+│   └── UserAlreadyExistsException.java
 ├── repository/          # Data access layer
 │   ├── TodoRepository.java
+│   ├── UserRepository.java
 │   ├── TodoQuery.java       # Search criteria record
 │   └── spec/
 │       └── TodoSpecs.java   # JPA Specifications for filtering
 └── service/
-    └── TodoService.java     # Business logic
+    ├── TodoService.java     # Todo business logic
+    └── UserService.java     # User registration & profile
 ```
 
 ---

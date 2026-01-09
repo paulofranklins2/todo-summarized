@@ -18,6 +18,8 @@
 * [x] Unit tests for TodoMapper (17 tests, 100% coverage)
 * [x] Unit tests for GlobalExceptionHandler (13 tests, 80%+ coverage)
 * [x] Unit tests for TodoService (20 tests, 80%+ coverage)
+* [x] Unit tests for UserService (24 tests, 80%+ coverage)
+* [x] Unit tests for SecurityConfig (8 tests, 80%+ coverage)
 * [ ] Integration tests (Testcontainers + repository)
 * [ ] Swagger/OpenAPI documentation
 
@@ -37,7 +39,7 @@
 ## P2
 
 * [ ] Add simple Thymeleaf frontend for user experience
-* [ ] Add Spring Security for user login/logout and account management
+* [x] Add Spring Security for user login/logout and account management
 * [ ] Add user accounts + JWT auth
 * [ ] Add tags/categories
 * [ ] Weekly summary endpoint
