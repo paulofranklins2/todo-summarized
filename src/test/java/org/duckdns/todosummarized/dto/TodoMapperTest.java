@@ -1,8 +1,11 @@
 package org.duckdns.todosummarized.dto;
 
 import org.duckdns.todosummarized.domains.entity.Todo;
+import org.duckdns.todosummarized.domains.entity.User;
+import org.duckdns.todosummarized.domains.enums.Role;
 import org.duckdns.todosummarized.domains.enums.TaskPriority;
 import org.duckdns.todosummarized.domains.enums.TaskStatus;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,6 +16,18 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TodoMapperTest {
+
+    private User user;
+
+    @BeforeEach
+    void setUp() {
+        user = User.builder()
+                .id(UUID.randomUUID())
+                .email("test@example.com")
+                .password("password")
+                .role(Role.ROLE_USER)
+                .build();
+    }
 
     @Nested
     @DisplayName("toResponseDTO tests")
@@ -42,6 +57,7 @@ class TodoMapperTest {
             todo.setDueDate(dueDate);
             todo.setCreatedAt(now);
             todo.setUpdatedAt(now);
+            todo.setUser(user);
 
             // When
             TodoResponseDTO result = TodoMapper.toResponseDTO(todo);
@@ -88,7 +104,7 @@ class TodoMapperTest {
         @Test
         @DisplayName("Should return null when dto is null")
         void shouldReturnNullWhenDtoIsNull() {
-            Todo result = TodoMapper.toNewEntity(null);
+            Todo result = TodoMapper.toNewEntity(null, user);
             assertNull(result);
         }
 
@@ -106,7 +122,7 @@ class TodoMapperTest {
                     .build();
 
             // When
-            Todo result = TodoMapper.toNewEntity(dto);
+            Todo result = TodoMapper.toNewEntity(dto, user);
 
             // Then
             assertNotNull(result);
@@ -115,6 +131,7 @@ class TodoMapperTest {
             assertEquals(dueDate, result.getDueDate());
             assertEquals(TaskStatus.IN_PROGRESS, result.getStatus());
             assertEquals(TaskPriority.HIGH, result.getPriority());
+            assertEquals(user, result.getUser());
         }
 
         @Test
@@ -127,11 +144,12 @@ class TodoMapperTest {
                     .build();
 
             // When
-            Todo result = TodoMapper.toNewEntity(dto);
+            Todo result = TodoMapper.toNewEntity(dto, user);
 
             // Then
             assertNotNull(result);
             assertEquals(TaskStatus.NOT_STARTED, result.getStatus());
+            assertEquals(user, result.getUser());
         }
 
         @Test
@@ -144,11 +162,12 @@ class TodoMapperTest {
                     .build();
 
             // When
-            Todo result = TodoMapper.toNewEntity(dto);
+            Todo result = TodoMapper.toNewEntity(dto, user);
 
             // Then
             assertNotNull(result);
             assertEquals(TaskPriority.LOW, result.getPriority());
+            assertEquals(user, result.getUser());
         }
 
         @Test
@@ -161,12 +180,13 @@ class TodoMapperTest {
                     .build();
 
             // When
-            Todo result = TodoMapper.toNewEntity(dto);
+            Todo result = TodoMapper.toNewEntity(dto, user);
 
             // Then
             assertNotNull(result);
             assertEquals(TaskStatus.NOT_STARTED, result.getStatus());
             assertEquals(TaskPriority.LOW, result.getPriority());
+            assertEquals(user, result.getUser());
         }
     }
 

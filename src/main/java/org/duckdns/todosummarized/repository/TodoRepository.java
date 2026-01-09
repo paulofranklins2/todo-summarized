@@ -1,6 +1,7 @@
 package org.duckdns.todosummarized.repository;
 
 import org.duckdns.todosummarized.domains.entity.Todo;
+import org.duckdns.todosummarized.domains.entity.User;
 import org.duckdns.todosummarized.domains.enums.TaskStatus;
 import org.duckdns.todosummarized.repository.projection.PriorityCountProjection;
 import org.duckdns.todosummarized.repository.projection.StatusCountProjection;
@@ -12,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -20,26 +22,46 @@ import java.util.UUID;
 public interface TodoRepository extends JpaRepository<Todo, UUID>, JpaSpecificationExecutor<Todo> {
 
     /**
-     * Deletes the todo with the given id.
+     * Find a todo by ID and user.
      *
-     * @param id the id of the todo to be deleted
+     * @param id   the todo ID
+     * @param user the user who owns the todo
+     * @return the todo if found and owned by the user
+     */
+    Optional<Todo> findByIdAndUser(UUID id, User user);
+
+    /**
+     * Deletes the todo with the given id and user.
+     *
+     * @param id   the id of the todo to be deleted
+     * @param user the user who owns the todo
      * @return the number of rows deleted
      */
-    long deleteTodoById(UUID id);
+    long deleteByIdAndUser(UUID id, User user);
 
-    @Query("select t.status as status, count(t) as count from Todo t group by t.status")
-    List<StatusCountProjection> countGroupedByStatus();
+    /**
+     * Count todos by user.
+     *
+     * @param user the user
+     * @return the count
+     */
+    long countByUser(User user);
 
-    @Query("select t.priority as priority, count(t) as count from Todo t group by t.priority")
-    List<PriorityCountProjection> countGroupedByPriority();
+    @Query("select t.status as status, count(t) as count from Todo t where t.user = :user group by t.status")
+    List<StatusCountProjection> countGroupedByStatusAndUser(@Param("user") User user);
+
+    @Query("select t.priority as priority, count(t) as count from Todo t where t.user = :user group by t.priority")
+    List<PriorityCountProjection> countGroupedByPriorityAndUser(@Param("user") User user);
 
     @Query("""
             select count(t)
             from Todo t
-            where t.dueDate < :now
+            where t.user = :user
+              and t.dueDate < :now
               and t.status not in :excludedStatuses
             """)
-    long countOverdue(
+    long countOverdueByUser(
+            @Param("user") User user,
             @Param("now") LocalDateTime now,
             @Param("excludedStatuses") Collection<TaskStatus> excludedStatuses
     );
@@ -47,8 +69,13 @@ public interface TodoRepository extends JpaRepository<Todo, UUID>, JpaSpecificat
     @Query("""
             select count(t)
             from Todo t
-            where t.dueDate >= :start
+            where t.user = :user
+              and t.dueDate >= :start
               and t.dueDate < :end
             """)
-    long countDueBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+    long countDueBetweenByUser(
+            @Param("user") User user,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 }

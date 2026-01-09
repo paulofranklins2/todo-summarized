@@ -1,5 +1,7 @@
 package org.duckdns.todosummarized.service;
 
+import org.duckdns.todosummarized.domains.entity.User;
+import org.duckdns.todosummarized.domains.enums.Role;
 import org.duckdns.todosummarized.domains.enums.TaskPriority;
 import org.duckdns.todosummarized.domains.enums.TaskStatus;
 import org.duckdns.todosummarized.dto.DailySummaryDTO;
@@ -21,10 +23,12 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +44,8 @@ class SummaryServiceTest {
     @InjectMocks
     private SummaryService summaryService;
 
+    private User user;
+
     private static final LocalDate FIXED_DATE = LocalDate.of(2026, 1, 9);
     private static final ZoneId ZONE_ID = ZoneId.systemDefault();
 
@@ -48,6 +54,13 @@ class SummaryServiceTest {
         Instant fixedInstant = FIXED_DATE.atStartOfDay(ZONE_ID).toInstant();
         when(clock.instant()).thenReturn(fixedInstant);
         when(clock.getZone()).thenReturn(ZONE_ID);
+
+        user = User.builder()
+                .id(UUID.randomUUID())
+                .email("test@example.com")
+                .password("password")
+                .role(Role.ROLE_USER)
+                .build();
     }
 
     @Nested
@@ -60,7 +73,7 @@ class SummaryServiceTest {
             mockAllCounts(0, 0, 0, 0, 0, 0, 0, 0);
             mockPriorityCounts(0, 0, 0, 0);
 
-            DailySummaryDTO result = summaryService.getDailySummary();
+            DailySummaryDTO result = summaryService.getDailySummary(user);
 
             assertEquals(FIXED_DATE, result.date());
         }
@@ -68,12 +81,12 @@ class SummaryServiceTest {
         @Test
         @DisplayName("should return total count")
         void shouldReturnTotalCount() {
-            when(todoRepository.count()).thenReturn(25L);
+            when(todoRepository.countByUser(user)).thenReturn(25L);
             mockStatusCounts(10, 8, 5, 2);
             mockTimeCounts(3, 4, 6);
             mockPriorityCounts(5, 10, 8, 2);
 
-            DailySummaryDTO result = summaryService.getDailySummary();
+            DailySummaryDTO result = summaryService.getDailySummary(user);
 
             assertEquals(25L, result.totalTodos());
         }
@@ -84,7 +97,7 @@ class SummaryServiceTest {
             mockAllCounts(20, 8, 6, 4, 2, 3, 2, 5);
             mockPriorityCounts(5, 8, 5, 2);
 
-            DailySummaryDTO result = summaryService.getDailySummary();
+            DailySummaryDTO result = summaryService.getDailySummary(user);
 
             assertEquals(8L, result.completedCount());
             assertEquals(6L, result.inProgressCount());
@@ -98,7 +111,7 @@ class SummaryServiceTest {
             mockAllCounts(20, 10, 5, 3, 2, 4, 3, 6);
             mockPriorityCounts(5, 8, 5, 2);
 
-            DailySummaryDTO result = summaryService.getDailySummary();
+            DailySummaryDTO result = summaryService.getDailySummary(user);
 
             assertEquals(4L, result.overdueCount());
             assertEquals(3L, result.dueTodayCount());
@@ -112,7 +125,7 @@ class SummaryServiceTest {
             mockAllCounts(20, 10, 5, 3, 2, 3, 2, 5);
             mockPriorityCounts(5, 8, 5, 2);
 
-            DailySummaryDTO result = summaryService.getDailySummary();
+            DailySummaryDTO result = summaryService.getDailySummary(user);
 
             assertEquals(55.56, result.completionRate(), 0.01);
         }
@@ -124,7 +137,7 @@ class SummaryServiceTest {
             mockAllCounts(5, 0, 0, 0, 5, 0, 0, 0);
             mockPriorityCounts(0, 0, 0, 0);
 
-            DailySummaryDTO result = summaryService.getDailySummary();
+            DailySummaryDTO result = summaryService.getDailySummary(user);
 
             assertEquals(0.0, result.completionRate());
         }
@@ -135,7 +148,7 @@ class SummaryServiceTest {
             mockAllCounts(10, 10, 0, 0, 0, 0, 0, 0);
             mockPriorityCounts(3, 4, 2, 1);
 
-            DailySummaryDTO result = summaryService.getDailySummary();
+            DailySummaryDTO result = summaryService.getDailySummary(user);
 
             assertEquals(100.0, result.completionRate());
         }
@@ -146,7 +159,7 @@ class SummaryServiceTest {
             mockAllCounts(20, 10, 5, 3, 2, 3, 2, 5);
             mockPriorityCounts(5, 8, 5, 2);
 
-            DailySummaryDTO result = summaryService.getDailySummary();
+            DailySummaryDTO result = summaryService.getDailySummary(user);
 
             assertNotNull(result.byPriority());
             assertEquals(5L, result.byPriority().get("LOW"));
@@ -161,7 +174,7 @@ class SummaryServiceTest {
             mockAllCounts(20, 10, 5, 3, 2, 3, 2, 5);
             mockPriorityCounts(5, 8, 5, 2);
 
-            DailySummaryDTO result = summaryService.getDailySummary();
+            DailySummaryDTO result = summaryService.getDailySummary(user);
 
             assertNotNull(result.byStatus());
             assertEquals(10L, result.byStatus().get("COMPLETED"));
@@ -176,7 +189,7 @@ class SummaryServiceTest {
             mockAllCounts(0, 0, 0, 0, 0, 0, 0, 0);
             mockPriorityCounts(0, 0, 0, 0);
 
-            DailySummaryDTO result = summaryService.getDailySummary();
+            DailySummaryDTO result = summaryService.getDailySummary(user);
 
             assertEquals(0L, result.totalTodos());
             assertEquals(0L, result.completedCount());
@@ -188,7 +201,7 @@ class SummaryServiceTest {
     private void mockAllCounts(long total, long completed, long inProgress,
                                long notStarted, long cancelled,
                                long overdue, long dueToday, long upcoming) {
-        when(todoRepository.count()).thenReturn(total);
+        when(todoRepository.countByUser(user)).thenReturn(total);
         mockStatusCounts(completed, inProgress, notStarted, cancelled);
         mockTimeCounts(overdue, dueToday, upcoming);
     }
@@ -199,7 +212,7 @@ class SummaryServiceTest {
         if (inProgress > 0) statusResults.add(createStatusProjection(TaskStatus.IN_PROGRESS, inProgress));
         if (notStarted > 0) statusResults.add(createStatusProjection(TaskStatus.NOT_STARTED, notStarted));
         if (cancelled > 0) statusResults.add(createStatusProjection(TaskStatus.CANCELLED, cancelled));
-        when(todoRepository.countGroupedByStatus()).thenReturn(statusResults);
+        when(todoRepository.countGroupedByStatusAndUser(user)).thenReturn(statusResults);
     }
 
     private StatusCountProjection createStatusProjection(TaskStatus status, long count) {
@@ -210,8 +223,8 @@ class SummaryServiceTest {
     }
 
     private void mockTimeCounts(long overdue, long dueToday, long upcoming) {
-        when(todoRepository.countOverdue(any(), any())).thenReturn(overdue);
-        when(todoRepository.countDueBetween(any(), any())).thenReturn(dueToday, upcoming);
+        when(todoRepository.countOverdueByUser(eq(user), any(), any())).thenReturn(overdue);
+        when(todoRepository.countDueBetweenByUser(eq(user), any(), any())).thenReturn(dueToday, upcoming);
     }
 
     private void mockPriorityCounts(long low, long medium, long high, long critical) {
@@ -220,7 +233,7 @@ class SummaryServiceTest {
         if (medium > 0) priorityResults.add(createPriorityProjection(TaskPriority.MEDIUM, medium));
         if (high > 0) priorityResults.add(createPriorityProjection(TaskPriority.HIGH, high));
         if (critical > 0) priorityResults.add(createPriorityProjection(TaskPriority.CRITICAL, critical));
-        when(todoRepository.countGroupedByPriority()).thenReturn(priorityResults);
+        when(todoRepository.countGroupedByPriorityAndUser(user)).thenReturn(priorityResults);
     }
 
     private PriorityCountProjection createPriorityProjection(TaskPriority priority, long count) {
@@ -230,4 +243,3 @@ class SummaryServiceTest {
         return projection;
     }
 }
-

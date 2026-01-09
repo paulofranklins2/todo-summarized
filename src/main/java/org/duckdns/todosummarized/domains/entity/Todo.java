@@ -25,6 +25,10 @@ public class Todo {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     /**
      * Automatically sets createdAt timestamp when a new TOOD is created.
      */

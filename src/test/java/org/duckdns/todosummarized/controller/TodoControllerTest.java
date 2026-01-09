@@ -1,6 +1,8 @@
 package org.duckdns.todosummarized.controller;
 
 import org.duckdns.todosummarized.domains.entity.Todo;
+import org.duckdns.todosummarized.domains.entity.User;
+import org.duckdns.todosummarized.domains.enums.Role;
 import org.duckdns.todosummarized.domains.enums.TaskPriority;
 import org.duckdns.todosummarized.domains.enums.TaskStatus;
 import org.duckdns.todosummarized.dto.TodoRequestDTO;
@@ -29,7 +31,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@ExtendWith(MockitoExtension.class)
 class TodoControllerTest {
 
     @Mock
@@ -41,10 +42,18 @@ class TodoControllerTest {
     private UUID id;
     private Todo todo;
     private TodoRequestDTO request;
+    private User user;
 
     @BeforeEach
     void setUp() {
         id = UUID.randomUUID();
+
+        user = User.builder()
+                .id(UUID.randomUUID())
+                .email("test@example.com")
+                .password("password")
+                .role(Role.ROLE_USER)
+                .build();
 
         todo = new Todo();
         todo.setId(id);
@@ -52,6 +61,7 @@ class TodoControllerTest {
         todo.setDescription("Test Description");
         todo.setPriority(TaskPriority.MEDIUM);
         todo.setStatus(TaskStatus.NOT_STARTED);
+        todo.setUser(user);
 
         request = TodoRequestDTO.builder()
                 .title("Test Todo")
@@ -66,16 +76,16 @@ class TodoControllerTest {
      */
     @Test
     void createTodo_returnsCreated() {
-        when(todoService.createTodo(any())).thenReturn(todo);
+        when(todoService.createTodo(any(), any(User.class))).thenReturn(todo);
 
         ResponseEntity<TodoResponseDTO> response =
-                todoController.createTodo(request);
+                todoController.createTodo(request, user);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(id, response.getBody().id());
 
-        verify(todoService).createTodo(request);
+        verify(todoService).createTodo(request, user);
     }
 
     /**
@@ -83,10 +93,10 @@ class TodoControllerTest {
      */
     @Test
     void getTodoById_returnsTodo() {
-        when(todoService.getTodoById(id)).thenReturn(todo);
+        when(todoService.getTodoById(id, user)).thenReturn(todo);
 
         ResponseEntity<TodoResponseDTO> response =
-                todoController.getTodoById(id);
+                todoController.getTodoById(id, user);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(id, response.getBody().id());
@@ -97,12 +107,12 @@ class TodoControllerTest {
      */
     @Test
     void getTodoById_throwsWhenNotFound() {
-        when(todoService.getTodoById(id))
+        when(todoService.getTodoById(id, user))
                 .thenThrow(new TodoNotFoundException(id));
 
         assertThrows(
                 TodoNotFoundException.class,
-                () -> todoController.getTodoById(id)
+                () -> todoController.getTodoById(id, user)
         );
     }
 
@@ -111,11 +121,11 @@ class TodoControllerTest {
      */
     @Test
     void updateTodo_returnsUpdatedTodo() {
-        when(todoService.updateTodo(eq(id), any()))
+        when(todoService.updateTodo(eq(id), any(), eq(user)))
                 .thenReturn(todo);
 
         ResponseEntity<TodoResponseDTO> response =
-                todoController.updateTodo(id, request);
+                todoController.updateTodo(id, request, user);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(id, response.getBody().id());
@@ -126,10 +136,10 @@ class TodoControllerTest {
      */
     @Test
     void deleteTodo_returnsNoContent() {
-        doNothing().when(todoService).deleteTodo(id);
+        doNothing().when(todoService).deleteTodo(id, user);
 
         ResponseEntity<Void> response =
-                todoController.deleteTodo(id);
+                todoController.deleteTodo(id, user);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
@@ -141,11 +151,11 @@ class TodoControllerTest {
     @Test
     void updateStatus_updatesStatus() {
         todo.setStatus(TaskStatus.COMPLETED);
-        when(todoService.updateStatus(id, TaskStatus.COMPLETED))
+        when(todoService.updateStatus(id, TaskStatus.COMPLETED, user))
                 .thenReturn(todo);
 
         ResponseEntity<TodoResponseDTO> response =
-                todoController.updateStatus(id, TaskStatus.COMPLETED);
+                todoController.updateStatus(id, TaskStatus.COMPLETED, user);
 
         assertEquals(TaskStatus.COMPLETED, response.getBody().status());
     }
@@ -156,7 +166,7 @@ class TodoControllerTest {
     @Test
     void searchTodos_passesFilters() {
         Pageable pageable = PageRequest.of(0, 10);
-        when(todoService.search(any(TodoQuery.class), eq(pageable)))
+        when(todoService.search(any(TodoQuery.class), eq(pageable), eq(user)))
                 .thenReturn(Page.empty(pageable));
 
         todoController.searchTodos(
@@ -166,13 +176,14 @@ class TodoControllerTest {
                 null,
                 true,
                 false,
-                pageable
+                pageable,
+                user
         );
 
         ArgumentCaptor<TodoQuery> captor =
                 ArgumentCaptor.forClass(TodoQuery.class);
 
-        verify(todoService).search(captor.capture(), eq(pageable));
+        verify(todoService).search(captor.capture(), eq(pageable), eq(user));
 
         TodoQuery query = captor.getValue();
         assertEquals(TaskStatus.IN_PROGRESS, query.status());
@@ -181,5 +192,3 @@ class TodoControllerTest {
         assertFalse(query.upcoming());
     }
 }
-
-

@@ -1,6 +1,8 @@
 package org.duckdns.todosummarized.service;
 
 import org.duckdns.todosummarized.domains.entity.Todo;
+import org.duckdns.todosummarized.domains.entity.User;
+import org.duckdns.todosummarized.domains.enums.Role;
 import org.duckdns.todosummarized.domains.enums.TaskPriority;
 import org.duckdns.todosummarized.domains.enums.TaskStatus;
 import org.duckdns.todosummarized.dto.TodoRequestDTO;
@@ -32,6 +34,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,11 +45,18 @@ class TodoServiceTest {
 
     private Clock fixedClock;
     private TodoService todoService;
+    private User user;
 
     @BeforeEach
     void setUp() {
         fixedClock = Clock.fixed(Instant.parse("2026-01-08T12:00:00Z"), ZoneId.of("UTC"));
         todoService = new TodoService(todoRepository, fixedClock);
+        user = User.builder()
+                .id(UUID.randomUUID())
+                .email("test@example.com")
+                .password("password")
+                .role(Role.ROLE_USER)
+                .build();
     }
 
     @Nested
@@ -73,11 +83,12 @@ class TodoServiceTest {
             savedTodo.setDueDate(dueDate);
             savedTodo.setStatus(TaskStatus.IN_PROGRESS);
             savedTodo.setPriority(TaskPriority.HIGH);
+            savedTodo.setUser(user);
 
             when(todoRepository.save(any(Todo.class))).thenReturn(savedTodo);
 
             // When
-            Todo result = todoService.createTodo(requestDTO);
+            Todo result = todoService.createTodo(requestDTO, user);
 
             // Then
             assertNotNull(result);
@@ -89,6 +100,7 @@ class TodoServiceTest {
             ArgumentCaptor<Todo> captor = ArgumentCaptor.forClass(Todo.class);
             verify(todoRepository).save(captor.capture());
             assertEquals("Test Todo", captor.getValue().getTitle());
+            assertEquals(user, captor.getValue().getUser());
         }
 
         @Test
@@ -104,11 +116,12 @@ class TodoServiceTest {
             savedTodo.setTitle("Todo with defaults");
             savedTodo.setStatus(TaskStatus.NOT_STARTED);
             savedTodo.setPriority(TaskPriority.LOW);
+            savedTodo.setUser(user);
 
             when(todoRepository.save(any(Todo.class))).thenReturn(savedTodo);
 
             // When
-            Todo result = todoService.createTodo(requestDTO);
+            Todo result = todoService.createTodo(requestDTO, user);
 
             // Then
             assertNotNull(result);
@@ -117,6 +130,7 @@ class TodoServiceTest {
             verify(todoRepository).save(captor.capture());
             assertEquals(TaskStatus.NOT_STARTED, captor.getValue().getStatus());
             assertEquals(TaskPriority.LOW, captor.getValue().getPriority());
+            assertEquals(user, captor.getValue().getUser());
         }
     }
 
@@ -132,17 +146,18 @@ class TodoServiceTest {
             Todo todo = new Todo();
             todo.setId(id);
             todo.setTitle("Found Todo");
+            todo.setUser(user);
 
-            when(todoRepository.findById(id)).thenReturn(Optional.of(todo));
+            when(todoRepository.findByIdAndUser(id, user)).thenReturn(Optional.of(todo));
 
             // When
-            Todo result = todoService.getTodoById(id);
+            Todo result = todoService.getTodoById(id, user);
 
             // Then
             assertNotNull(result);
             assertEquals(id, result.getId());
             assertEquals("Found Todo", result.getTitle());
-            verify(todoRepository).findById(id);
+            verify(todoRepository).findByIdAndUser(id, user);
         }
 
         @Test
@@ -150,15 +165,15 @@ class TodoServiceTest {
         void shouldThrowWhenNotFound() {
             // Given
             UUID id = UUID.randomUUID();
-            when(todoRepository.findById(id)).thenReturn(Optional.empty());
+            when(todoRepository.findByIdAndUser(id, user)).thenReturn(Optional.empty());
 
             // When & Then
             TodoNotFoundException exception = assertThrows(
                     TodoNotFoundException.class,
-                    () -> todoService.getTodoById(id)
+                    () -> todoService.getTodoById(id, user)
             );
             assertEquals("Todo not found with id: " + id, exception.getMessage());
-            verify(todoRepository).findById(id);
+            verify(todoRepository).findByIdAndUser(id, user);
         }
     }
 
@@ -180,6 +195,7 @@ class TodoServiceTest {
             existingTodo.setStatus(TaskStatus.NOT_STARTED);
             existingTodo.setPriority(TaskPriority.LOW);
             existingTodo.setDueDate(LocalDateTime.now());
+            existingTodo.setUser(user);
 
             TodoRequestDTO updateDTO = TodoRequestDTO.builder()
                     .title("New Title")
@@ -189,10 +205,10 @@ class TodoServiceTest {
                     .dueDate(newDueDate)
                     .build();
 
-            when(todoRepository.findById(id)).thenReturn(Optional.of(existingTodo));
+            when(todoRepository.findByIdAndUser(id, user)).thenReturn(Optional.of(existingTodo));
 
             // When
-            Todo result = todoService.updateTodo(id, updateDTO);
+            Todo result = todoService.updateTodo(id, updateDTO, user);
 
             // Then
             assertNotNull(result);
@@ -217,15 +233,16 @@ class TodoServiceTest {
             existingTodo.setStatus(TaskStatus.IN_PROGRESS);
             existingTodo.setPriority(TaskPriority.HIGH);
             existingTodo.setDueDate(originalDueDate);
+            existingTodo.setUser(user);
 
             TodoRequestDTO updateDTO = TodoRequestDTO.builder()
                     .title("New Title")
                     .build();
 
-            when(todoRepository.findById(id)).thenReturn(Optional.of(existingTodo));
+            when(todoRepository.findByIdAndUser(id, user)).thenReturn(Optional.of(existingTodo));
 
             // When
-            Todo result = todoService.updateTodo(id, updateDTO);
+            Todo result = todoService.updateTodo(id, updateDTO, user);
 
             // Then
             assertNotNull(result);
@@ -245,12 +262,12 @@ class TodoServiceTest {
                     .title("New Title")
                     .build();
 
-            when(todoRepository.findById(id)).thenReturn(Optional.empty());
+            when(todoRepository.findByIdAndUser(id, user)).thenReturn(Optional.empty());
 
             // When & Then
             assertThrows(
                     TodoNotFoundException.class,
-                    () -> todoService.updateTodo(id, updateDTO)
+                    () -> todoService.updateTodo(id, updateDTO, user)
             );
         }
     }
@@ -264,13 +281,13 @@ class TodoServiceTest {
         void shouldDeleteTodoSuccessfully() {
             // Given
             UUID id = UUID.randomUUID();
-            when(todoRepository.deleteTodoById(id)).thenReturn(1L);
+            when(todoRepository.deleteByIdAndUser(id, user)).thenReturn(1L);
 
             // When
-            todoService.deleteTodo(id);
+            todoService.deleteTodo(id, user);
 
             // Then
-            verify(todoRepository).deleteTodoById(id);
+            verify(todoRepository).deleteByIdAndUser(id, user);
         }
 
         @Test
@@ -278,15 +295,15 @@ class TodoServiceTest {
         void shouldThrowWhenDeletingNonExistent() {
             // Given
             UUID id = UUID.randomUUID();
-            when(todoRepository.deleteTodoById(id)).thenReturn(0L);
+            when(todoRepository.deleteByIdAndUser(id, user)).thenReturn(0L);
 
             // When & Then
             TodoNotFoundException exception = assertThrows(
                     TodoNotFoundException.class,
-                    () -> todoService.deleteTodo(id)
+                    () -> todoService.deleteTodo(id, user)
             );
             assertEquals("Todo not found with id: " + id, exception.getMessage());
-            verify(todoRepository).deleteTodoById(id);
+            verify(todoRepository).deleteByIdAndUser(id, user);
         }
     }
 
@@ -303,16 +320,17 @@ class TodoServiceTest {
             existingTodo.setId(id);
             existingTodo.setTitle("Test Todo");
             existingTodo.setStatus(TaskStatus.NOT_STARTED);
+            existingTodo.setUser(user);
 
-            when(todoRepository.findById(id)).thenReturn(Optional.of(existingTodo));
+            when(todoRepository.findByIdAndUser(id, user)).thenReturn(Optional.of(existingTodo));
 
             // When
-            Todo result = todoService.updateStatus(id, TaskStatus.COMPLETED);
+            Todo result = todoService.updateStatus(id, TaskStatus.COMPLETED, user);
 
             // Then
             assertNotNull(result);
             assertEquals(TaskStatus.COMPLETED, result.getStatus());
-            verify(todoRepository).findById(id);
+            verify(todoRepository).findByIdAndUser(id, user);
         }
 
         @Test
@@ -323,11 +341,12 @@ class TodoServiceTest {
             Todo existingTodo = new Todo();
             existingTodo.setId(id);
             existingTodo.setStatus(TaskStatus.IN_PROGRESS);
+            existingTodo.setUser(user);
 
-            when(todoRepository.findById(id)).thenReturn(Optional.of(existingTodo));
+            when(todoRepository.findByIdAndUser(id, user)).thenReturn(Optional.of(existingTodo));
 
             // When
-            Todo result = todoService.updateStatus(id, TaskStatus.CANCELLED);
+            Todo result = todoService.updateStatus(id, TaskStatus.CANCELLED, user);
 
             // Then
             assertEquals(TaskStatus.CANCELLED, result.getStatus());
@@ -338,12 +357,12 @@ class TodoServiceTest {
         void shouldThrowWhenUpdatingStatusOfNonExistent() {
             // Given
             UUID id = UUID.randomUUID();
-            when(todoRepository.findById(id)).thenReturn(Optional.empty());
+            when(todoRepository.findByIdAndUser(id, user)).thenReturn(Optional.empty());
 
             // When & Then
             assertThrows(
                     TodoNotFoundException.class,
-                    () -> todoService.updateStatus(id, TaskStatus.COMPLETED)
+                    () -> todoService.updateStatus(id, TaskStatus.COMPLETED, user)
             );
         }
     }
@@ -353,7 +372,7 @@ class TodoServiceTest {
     class SearchTests {
 
         @Test
-        @DisplayName("Should search with empty query returning all todos")
+        @DisplayName("Should search with empty query returning all user todos")
         void shouldSearchWithEmptyQuery() {
             // Given
             TodoQuery query = new TodoQuery(null, null, null, null, null, null);
@@ -362,16 +381,18 @@ class TodoServiceTest {
             Todo todo1 = new Todo();
             todo1.setId(UUID.randomUUID());
             todo1.setTitle("Todo 1");
+            todo1.setUser(user);
 
             Todo todo2 = new Todo();
             todo2.setId(UUID.randomUUID());
             todo2.setTitle("Todo 2");
+            todo2.setUser(user);
 
             Page<Todo> expectedPage = new PageImpl<>(List.of(todo1, todo2), pageable, 2);
             when(todoRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(expectedPage);
 
             // When
-            Page<Todo> result = todoService.search(query, pageable);
+            Page<Todo> result = todoService.search(query, pageable, user);
 
             // Then
             assertNotNull(result);
@@ -391,12 +412,13 @@ class TodoServiceTest {
             todo.setId(UUID.randomUUID());
             todo.setTitle("In Progress Todo");
             todo.setStatus(TaskStatus.IN_PROGRESS);
+            todo.setUser(user);
 
             Page<Todo> expectedPage = new PageImpl<>(List.of(todo), pageable, 1);
             when(todoRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(expectedPage);
 
             // When
-            Page<Todo> result = todoService.search(query, pageable);
+            Page<Todo> result = todoService.search(query, pageable, user);
 
             // Then
             assertNotNull(result);
@@ -415,7 +437,7 @@ class TodoServiceTest {
             when(todoRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(expectedPage);
 
             // When
-            Page<Todo> result = todoService.search(query, pageable);
+            Page<Todo> result = todoService.search(query, pageable, user);
 
             // Then
             assertNotNull(result);
@@ -436,12 +458,13 @@ class TodoServiceTest {
             todo.setId(UUID.randomUUID());
             todo.setTitle("January Todo");
             todo.setDueDate(LocalDateTime.of(2026, 1, 15, 12, 0));
+            todo.setUser(user);
 
             Page<Todo> expectedPage = new PageImpl<>(List.of(todo), pageable, 1);
             when(todoRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(expectedPage);
 
             // When
-            Page<Todo> result = todoService.search(query, pageable);
+            Page<Todo> result = todoService.search(query, pageable, user);
 
             // Then
             assertNotNull(result);
@@ -459,12 +482,13 @@ class TodoServiceTest {
             overdueTodo.setId(UUID.randomUUID());
             overdueTodo.setTitle("Overdue Todo");
             overdueTodo.setDueDate(LocalDateTime.of(2026, 1, 1, 0, 0));
+            overdueTodo.setUser(user);
 
             Page<Todo> expectedPage = new PageImpl<>(List.of(overdueTodo), pageable, 1);
             when(todoRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(expectedPage);
 
             // When
-            Page<Todo> result = todoService.search(query, pageable);
+            Page<Todo> result = todoService.search(query, pageable, user);
 
             // Then
             assertNotNull(result);
@@ -482,12 +506,13 @@ class TodoServiceTest {
             upcomingTodo.setId(UUID.randomUUID());
             upcomingTodo.setTitle("Upcoming Todo");
             upcomingTodo.setDueDate(LocalDateTime.of(2026, 2, 1, 0, 0));
+            upcomingTodo.setUser(user);
 
             Page<Todo> expectedPage = new PageImpl<>(List.of(upcomingTodo), pageable, 1);
             when(todoRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(expectedPage);
 
             // When
-            Page<Todo> result = todoService.search(query, pageable);
+            Page<Todo> result = todoService.search(query, pageable, user);
 
             // Then
             assertNotNull(result);
@@ -512,7 +537,7 @@ class TodoServiceTest {
             when(todoRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(expectedPage);
 
             // When
-            Page<Todo> result = todoService.search(query, pageable);
+            Page<Todo> result = todoService.search(query, pageable, user);
 
             // Then
             assertNotNull(result);
@@ -530,7 +555,7 @@ class TodoServiceTest {
             when(todoRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(expectedPage);
 
             // When
-            Page<Todo> result = todoService.search(query, pageable);
+            Page<Todo> result = todoService.search(query, pageable, user);
 
             // Then
             assertNotNull(result);

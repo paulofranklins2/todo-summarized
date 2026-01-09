@@ -1,6 +1,7 @@
 package org.duckdns.todosummarized.service;
 
 import lombok.RequiredArgsConstructor;
+import org.duckdns.todosummarized.domains.entity.User;
 import org.duckdns.todosummarized.domains.enums.TaskPriority;
 import org.duckdns.todosummarized.domains.enums.TaskStatus;
 import org.duckdns.todosummarized.dto.DailySummaryDTO;
@@ -25,20 +26,21 @@ public class SummaryService {
     private final Clock clock;
 
     /**
-     * Generates a daily summary of all todos with metrics and breakdowns.
+     * Generates a daily summary of todos for the specified user with metrics and breakdowns.
      * Includes counts by status, priority, overdue items, and completion rate.
      *
-     * @return a {@link DailySummaryDTO} containing today's todo metrics
+     * @param user the authenticated user
+     * @return a {@link DailySummaryDTO} containing today's todo metrics for the user
      */
     @Transactional(readOnly = true)
-    public DailySummaryDTO getDailySummary() {
+    public DailySummaryDTO getDailySummary(User user) {
         LocalDate today = LocalDate.now(clock);
         SummaryWindow summaryWindow = SummaryWindow.of(today, clock);
 
-        Map<TaskStatus, Long> statusCounts = countsByStatus();
-        Map<TaskPriority, Long> priorityCounts = countsByPriority();
+        Map<TaskStatus, Long> statusCounts = countsByStatus(user);
+        Map<TaskPriority, Long> priorityCounts = countsByPriority(user);
 
-        long totalTodos = todoRepository.count();
+        long totalTodos = todoRepository.countByUser(user);
         long cancelledCount = getOrZero(statusCounts, TaskStatus.CANCELLED);
         long completedCount = getOrZero(statusCounts, TaskStatus.COMPLETED);
 
@@ -51,9 +53,9 @@ public class SummaryService {
                 .inProgressCount(getOrZero(statusCounts, TaskStatus.IN_PROGRESS))
                 .notStartedCount(getOrZero(statusCounts, TaskStatus.NOT_STARTED))
                 .cancelledCount(cancelledCount)
-                .overdueCount(todoRepository.countOverdue(summaryWindow.now(), EXCLUDED_FROM_OVERDUE))
-                .dueTodayCount(todoRepository.countDueBetween(summaryWindow.startOfDay(), summaryWindow.endOfDay()))
-                .upcomingCount(todoRepository.countDueBetween(summaryWindow.startOfTomorrow(), summaryWindow.endOfUpcoming()))
+                .overdueCount(todoRepository.countOverdueByUser(user, summaryWindow.now(), EXCLUDED_FROM_OVERDUE))
+                .dueTodayCount(todoRepository.countDueBetweenByUser(user, summaryWindow.startOfDay(), summaryWindow.endOfDay()))
+                .upcomingCount(todoRepository.countDueBetweenByUser(user, summaryWindow.startOfTomorrow(), summaryWindow.endOfUpcoming()))
                 .completionRate(completionRate)
                 .byPriority(toNameKeyedMap(priorityCounts))
                 .byStatus(toNameKeyedMap(statusCounts))
@@ -61,27 +63,29 @@ public class SummaryService {
     }
 
     /**
-     * Fetches todo counts grouped by status in a single query.
+     * Fetches todo counts grouped by status for the specified user in a single query.
      * Initializes all status values to 0 before populating from the database.
      *
+     * @param user the user to filter by
      * @return a map of {@link TaskStatus} to count
      */
-    private Map<TaskStatus, Long> countsByStatus() {
+    private Map<TaskStatus, Long> countsByStatus(User user) {
         EnumMap<TaskStatus, Long> counts = initEnumCounts(TaskStatus.class, TaskStatus.values());
-        todoRepository.countGroupedByStatus()
+        todoRepository.countGroupedByStatusAndUser(user)
                 .forEach(row -> counts.put(row.getStatus(), row.getCount()));
         return counts;
     }
 
     /**
-     * Fetches todo counts grouped by priority in a single query.
+     * Fetches todo counts grouped by priority for the specified user in a single query.
      * Initializes all priority values to 0 before populating from the database.
      *
+     * @param user the user to filter by
      * @return a map of {@link TaskPriority} to count
      */
-    private Map<TaskPriority, Long> countsByPriority() {
+    private Map<TaskPriority, Long> countsByPriority(User user) {
         EnumMap<TaskPriority, Long> counts = initEnumCounts(TaskPriority.class, TaskPriority.values());
-        todoRepository.countGroupedByPriority()
+        todoRepository.countGroupedByPriorityAndUser(user)
                 .forEach(row -> counts.put(row.getPriority(), row.getCount()));
         return counts;
     }

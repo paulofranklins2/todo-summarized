@@ -2,6 +2,7 @@ package org.duckdns.todosummarized.dto;
 
 import lombok.experimental.UtilityClass;
 import org.duckdns.todosummarized.domains.entity.Todo;
+import org.duckdns.todosummarized.domains.entity.User;
 import org.duckdns.todosummarized.domains.enums.TaskPriority;
 import org.duckdns.todosummarized.domains.enums.TaskStatus;
 
@@ -36,13 +37,14 @@ public class TodoMapper {
     }
 
     /**
-     * Converts a TodoRequestDTO to a new Todo entity.
+     * Converts a TodoRequestDTO to a new Todo entity with the specified user.
      * Sets default values for status (NOT_STARTED) and priority (LOW) if not provided.
      *
-     * @param dto the TodoRequestDTO to convert
+     * @param dto  the TodoRequestDTO to convert
+     * @param user the user who owns this todo
      * @return a new Todo entity populated with the DTO values, or null if the input is null
      */
-    public static Todo toNewEntity(TodoRequestDTO dto) {
+    public static Todo toNewEntity(TodoRequestDTO dto, User user) {
         if (dto == null) return null;
 
         Todo todo = new Todo();
@@ -51,6 +53,7 @@ public class TodoMapper {
         todo.setDueDate(dto.getDueDate());
         todo.setStatus(defaultIfNull(dto.getStatus(), TaskStatus.NOT_STARTED));
         todo.setPriority(defaultIfNull(dto.getPriority(), TaskPriority.LOW));
+        todo.setUser(user);
         return todo;
     }
 

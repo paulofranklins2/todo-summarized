@@ -1,7 +1,10 @@
 package org.duckdns.todosummarized.controller;
 
+import org.duckdns.todosummarized.domains.entity.User;
+import org.duckdns.todosummarized.domains.enums.Role;
 import org.duckdns.todosummarized.dto.DailySummaryDTO;
 import org.duckdns.todosummarized.service.SummaryService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -25,6 +29,18 @@ class SummaryControllerTest {
 
     @InjectMocks
     private SummaryController summaryController;
+
+    private User user;
+
+    @BeforeEach
+    void setUp() {
+        user = User.builder()
+                .id(UUID.randomUUID())
+                .email("test@example.com")
+                .password("password")
+                .role(Role.ROLE_USER)
+                .build();
+    }
 
     @Test
     @DisplayName("getDailySummary returns 200 with summary data")
@@ -44,16 +60,16 @@ class SummaryControllerTest {
                 .byStatus(Map.of("COMPLETED", 10L, "IN_PROGRESS", 8L, "NOT_STARTED", 5L, "CANCELLED", 2L))
                 .build();
 
-        when(summaryService.getDailySummary()).thenReturn(mockSummary);
+        when(summaryService.getDailySummary(user)).thenReturn(mockSummary);
 
-        ResponseEntity<DailySummaryDTO> response = summaryController.getDailySummary();
+        ResponseEntity<DailySummaryDTO> response = summaryController.getDailySummary(user);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(25, response.getBody().totalTodos());
         assertEquals(10, response.getBody().completedCount());
         assertEquals(43.48, response.getBody().completionRate());
-        verify(summaryService, times(1)).getDailySummary();
+        verify(summaryService, times(1)).getDailySummary(user);
     }
 
     @Test
@@ -74,9 +90,9 @@ class SummaryControllerTest {
                 .byStatus(Map.of("COMPLETED", 0L, "IN_PROGRESS", 0L, "NOT_STARTED", 0L, "CANCELLED", 0L))
                 .build();
 
-        when(summaryService.getDailySummary()).thenReturn(emptySummary);
+        when(summaryService.getDailySummary(user)).thenReturn(emptySummary);
 
-        ResponseEntity<DailySummaryDTO> response = summaryController.getDailySummary();
+        ResponseEntity<DailySummaryDTO> response = summaryController.getDailySummary(user);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(0, response.getBody().totalTodos());
@@ -101,11 +117,11 @@ class SummaryControllerTest {
                 .byStatus(Map.of())
                 .build();
 
-        when(summaryService.getDailySummary()).thenReturn(mockSummary);
+        when(summaryService.getDailySummary(user)).thenReturn(mockSummary);
 
-        summaryController.getDailySummary();
+        summaryController.getDailySummary(user);
 
-        verify(summaryService, times(1)).getDailySummary();
+        verify(summaryService, times(1)).getDailySummary(user);
         verifyNoMoreInteractions(summaryService);
     }
 }
