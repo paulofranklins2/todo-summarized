@@ -11,7 +11,7 @@
 * [ ] Flyway migration: `todos` table with indexes (dueDate, status, priority)
 * [x] CRUD endpoints for todos (REST Controller)
 * [x] Validation rules (title required, max lengths, valid priority)
-* [ ] Daily summary endpoint returning deterministic metrics
+* [x] Daily summary endpoint returning deterministic metrics
 * [ ] AI summary service adapter (feature-flagged, timeout, retries)
 * [ ] Fallback behavior (metrics-only summary if AI disabled/fails)
 * [x] Basic error handling (global exception handler, clean error responses)
@@ -21,6 +21,8 @@
 * [x] Unit tests for UserService (24 tests, 80%+ coverage)
 * [x] Unit tests for SecurityConfig (8 tests, 80%+ coverage)
 * [x] Unit tests for TodoController (8 tests, 80%+ coverage)
+* [x] Unit tests for SummaryService (10 tests, 80%+ coverage)
+* [x] Unit tests for SummaryController (3 tests, 80%+ coverage)
 * [ ] Integration tests (Testcontainers + repository)
 * [x] Swagger/OpenAPI documentation
 

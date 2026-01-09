@@ -25,7 +25,8 @@ AI-generated narrative.
 src/main/java/org/duckdns/todosummarized/
 ├── config/                 # Security, time, app config
 ├── controller/             # REST controllers
-│   └── TodoController.java
+│   ├── TodoController.java
+│   └── SummaryController.java
 ├── domain/
 │   ├── entity/             # JPA entities
 │   │   ├── Todo.java
@@ -38,9 +39,10 @@ src/main/java/org/duckdns/todosummarized/
 │   │   ├── TodoRequestDTO.java
 │   │   ├── TodoResponseDTO.java
 │   │   └── TodoMapper.java
-│   └── user/
-│       ├── UserRegistrationDTO.java
-│       └── UserResponseDTO.java
+│   ├── user/
+│   │   ├── UserRegistrationDTO.java
+│   │   └── UserResponseDTO.java
+│   └── DailySummaryDTO.java
 ├── exception/
 │   ├── GlobalExceptionHandler.java
 │   ├── ErrorResponse.java
@@ -55,7 +57,8 @@ src/main/java/org/duckdns/todosummarized/
 │       └── TodoSpecs.java
 ├── service/
 │   ├── TodoService.java
-│   └── UserService.java
+│   ├── UserService.java
+│   └── SummaryService.java
 └── search/
     └── TodoQuery.java
 ```
