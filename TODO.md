@@ -10,24 +10,19 @@
 
 ## P0 – Core (Critical)
 
-* [x] Initialize Spring Boot project (Java 17, Spring Boot 4.0.1)
+* [x] Initialize Spring Boot project
 * [x] Keep README setup instructions accurate
 * [x] Create TODO.md
-* [x] Add dependencies (Web, Validation, JPA, Security, PostgreSQL, Thymeleaf)
+* [x] Add dependencies
 * [x] Define Todo entity
-* [x] Define enums (TaskStatus, TaskPriority)
-* [ ] Flyway migration for `todos` table
-    * [ ] Index: due_date
-    * [ ] Index: status
-    * [ ] Index: priority
+* [x] Define enums
 * [x] CRUD REST endpoints for todos
 * [x] Swagger/OpenAPI documentation for all endpoints
-* [x] Validation rules (title required, max lengths, valid enums)
-* [x] Daily summary endpoint (metrics only)
+* [x] Validation rules
+* [x] Daily summary endpoint
 * [x] AI summary adapter
 * [x] Metrics-only fallback if AI fails or is disabled
 * [x] Global exception handling with structured error responses
-* [ ] Integration tests
 * [x] Swagger security schemes configured
 
 ---
@@ -36,7 +31,7 @@
 
 * [x] Request/response DTOs
 * [x] TodoMapper
-* [x] Pagination for `GET /todos` (max 20 per page)
+* [x] Pagination for `GET /todos`
 * [x] Filtering
     * [x] Status
     * [x] Priority
@@ -44,10 +39,6 @@
     * [x] Overdue
     * [x] Upcoming
 * [x] Audit fields (createdAt, updatedAt)
-* [ ] Structured logging (request id / correlation id)
-* [ ] Actuator (health, info, metrics)
-* [ ] GitHub Actions CI (build + test)
-* [ ] AI prompt versioning in response
 * [x] Rate limiting for summary endpoint
 
 ---
@@ -62,8 +53,9 @@
 * [ ] Tags / categories
 * [ ] Weekly summary endpoint
 * [ ] Cache daily summaries
-* [ ] CLI client or minimal frontend
+* [ ] Actuator (health, info, metrics)
 * [ ] Deploy to hosting
+* [ ] GitHub Actions CI/CD
 
 ---
 
@@ -79,7 +71,6 @@
 * [x] SummaryController tests
 * [x] AuthController tests
 * [x] CustomUserDetailsService tests
-* [ ] Integration tests
 
 ---
 
