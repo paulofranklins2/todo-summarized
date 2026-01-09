@@ -1,23 +1,23 @@
 package org.duckdns.todosummarized.repository;
 
 import org.duckdns.todosummarized.domains.entity.Todo;
-import org.duckdns.todosummarized.domains.enums.TaskPriority;
-import org.duckdns.todosummarized.domains.enums.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
+/**
+ * Repository for TODO entity - handles all database operations.
+ */
 @Repository
-public interface TodoRepository extends JpaRepository<Todo, UUID> {
+public interface TodoRepository extends JpaRepository<Todo, UUID>, JpaSpecificationExecutor<Todo> {
 
-    List<Todo> findByStatus(TaskStatus status);
-
-    List<Todo> findByPriority(TaskPriority priority);
-
-    List<Todo> findByDueDateBefore(LocalDateTime dateTime);
-
-    List<Todo> findByDueDateAfter(LocalDateTime dateTime);
+    @Modifying
+    @Query("DELETE FROM Todo t WHERE t.id = :id")
+    int deleteByIdReturningCount(@Param("id") UUID id);
 }
+
