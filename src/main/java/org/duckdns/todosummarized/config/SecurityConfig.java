@@ -43,7 +43,6 @@ public class SecurityConfig {
             "/register",
             "/dashboard",
             "/todos",
-            "/summary",
             "/css/**",
             "/js/**",
             "/images/**",

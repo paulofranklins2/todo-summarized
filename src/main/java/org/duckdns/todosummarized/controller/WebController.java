@@ -30,25 +30,33 @@ public class WebController {
     }
 
     /**
-     * Login page - public access.
+     * Login page - redirects to landing with login modal.
      */
     @GetMapping("/login")
     public String loginPage() {
-        return "login";
+        return "redirect:/?login=true";
     }
 
     /**
-     * Registration page - public access.
+     * Registration page - redirects to landing with register modal.
      */
     @GetMapping("/register")
     public String registerPage() {
-        return "register";
+        return "redirect:/?register=true";
     }
 
     /**
-     * Dashboard/home page - requires authentication.
+     * Landing page - public access.
      */
-    @GetMapping({"/", "/dashboard", "/todos"})
+    @GetMapping("/")
+    public String landingPage() {
+        return "landing";
+    }
+
+    /**
+     * Dashboard page - requires authentication.
+     */
+    @GetMapping({"/dashboard", "/todos"})
     public String dashboardPage() {
         return "dashboard";
     }
