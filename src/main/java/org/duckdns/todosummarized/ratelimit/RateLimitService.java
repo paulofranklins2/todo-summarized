@@ -1,5 +1,6 @@
 package org.duckdns.todosummarized.ratelimit;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,11 +8,9 @@ import org.duckdns.todosummarized.config.RateLimitProperties;
 import org.duckdns.todosummarized.config.RateLimitProperties.EndpointLimit;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * Service for managing rate limiting per user and endpoint.
+ * Uses Caffeine cache for automatic memory management and expiration.
  */
 @Slf4j
 @Service
@@ -21,24 +20,18 @@ public class RateLimitService {
     private static final String AI_SUMMARY_KEY = "ai-summary";
     private static final String DAILY_SUMMARY_KEY = "daily-summary";
 
-    private final RateLimitProperties properties;
+    // Array indices for token bucket state
+    private static final int TOKENS_INDEX = 0;
+    private static final int LAST_REFILL_NANOS_INDEX = 1;
 
-    /**
-     * Lightweight token bucket state storing only essential data.
-     */
-    private record TokenBucketState(double tokens, long lastRefillNanos) {
-    }
+    private final RateLimitProperties properties;
+    private final Cache<String, double[]> rateLimitCache;
 
     /**
      * Result of a consumption attempt.
      */
     public record ConsumptionResult(boolean consumed, long remainingTokens, long nanosToWait) {
     }
-
-    /**
-     * Cache of token bucket states keyed by "userId:endpointKey".
-     */
-    private final Map<String, TokenBucketState> bucketStates = new ConcurrentHashMap<>();
 
     @PostConstruct
     void init() {
@@ -71,35 +64,37 @@ public class RateLimitService {
         long windowNanos = (long) limit.getWindowSeconds() * 1_000_000_000L;
         double refillRatePerNano = (double) capacity / windowNanos;
 
-        // Atomic compute operation  with ConcurrentHashMap
         final ConsumptionResult[] result = new ConsumptionResult[1];
 
-        bucketStates.compute(bucketKey, (key, state) -> {
+        rateLimitCache.asMap().compute(bucketKey, (key, state) -> {
             long nowNanos = System.nanoTime();
 
             if (state == null) {
                 // First request - initialize with full capacity minus 1 consumed token
                 result[0] = new ConsumptionResult(true, capacity - 1, 0);
-                return new TokenBucketState(capacity - 1, nowNanos);
+                return new double[]{capacity - 1, nowNanos};
             }
 
+            double tokens = state[TOKENS_INDEX];
+            double lastRefillNanos = state[LAST_REFILL_NANOS_INDEX];
+
             // Calculate elapsed time and tokens to add (greedy refill)
-            long elapsedNanos = nowNanos - state.lastRefillNanos();
+            long elapsedNanos = nowNanos - (long) lastRefillNanos;
             double tokensToAdd = elapsedNanos * refillRatePerNano;
-            double newTokens = Math.min(capacity, state.tokens() + tokensToAdd);
+            double newTokens = Math.min(capacity, tokens + tokensToAdd);
 
             if (newTokens >= 1.0) {
                 // Consume 1 token
                 double remaining = newTokens - 1.0;
                 result[0] = new ConsumptionResult(true, (long) remaining, 0);
-                return new TokenBucketState(remaining, nowNanos);
+                return new double[]{remaining, nowNanos};
             } else {
                 // Not enough tokens - calculate wait time
                 double tokensNeeded = 1.0 - newTokens;
                 long nanosToWait = (long) (tokensNeeded / refillRatePerNano);
                 result[0] = new ConsumptionResult(false, 0, nanosToWait);
-                // Don't update timestamp on rejection - preserve state
-                return new TokenBucketState(newTokens, nowNanos);
+                // Update state with current tokens (time-based calculation)
+                return new double[]{newTokens, nowNanos};
             }
         });
 
@@ -108,7 +103,6 @@ public class RateLimitService {
 
     /**
      * Gets the remaining tokens for a user and endpoint without consuming.
-     * Calculates current tokens based on elapsed time since last operation.
      */
     public long getRemainingTokens(String userId, String endpointKey) {
         if (!properties.isEnabled()) {
@@ -116,7 +110,7 @@ public class RateLimitService {
         }
 
         String bucketKey = buildBucketKey(userId, endpointKey);
-        TokenBucketState state = bucketStates.get(bucketKey);
+        double[] state = rateLimitCache.getIfPresent(bucketKey);
 
         EndpointLimit limit = getLimitConfig(endpointKey);
         long capacity = limit.getMaxRequests();
@@ -128,9 +122,9 @@ public class RateLimitService {
         // Calculate current tokens based on elapsed time
         long windowNanos = (long) limit.getWindowSeconds() * 1_000_000_000L;
         double refillRatePerNano = (double) capacity / windowNanos;
-        long elapsedNanos = System.nanoTime() - state.lastRefillNanos();
+        long elapsedNanos = System.nanoTime() - (long) state[LAST_REFILL_NANOS_INDEX];
         double tokensToAdd = elapsedNanos * refillRatePerNano;
-        double currentTokens = Math.min(capacity, state.tokens() + tokensToAdd);
+        double currentTokens = Math.min(capacity, state[TOKENS_INDEX] + tokensToAdd);
 
         return (long) currentTokens;
     }
@@ -160,17 +154,15 @@ public class RateLimitService {
      * Clears all cached bucket states. Useful for testing.
      */
     public void clearBuckets() {
-        bucketStates.clear();
+        rateLimitCache.invalidateAll();
         log.info("Rate limit bucket states cleared");
     }
 
     /**
      * Returns the current number of cached bucket states. Useful for monitoring.
-     *
-     * @return number of active bucket states
      */
-    public int getBucketCount() {
-        return bucketStates.size();
+    public long getBucketCount() {
+        return rateLimitCache.estimatedSize();
     }
 }
 

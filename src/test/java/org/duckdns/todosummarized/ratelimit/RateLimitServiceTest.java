@@ -1,10 +1,14 @@
 package org.duckdns.todosummarized.ratelimit;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.duckdns.todosummarized.config.RateLimitProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,7 +24,12 @@ class RateLimitServiceTest {
         properties.setAiSummary(new RateLimitProperties.EndpointLimit(3, 60));
         properties.setDailySummary(new RateLimitProperties.EndpointLimit(5, 60));
 
-        rateLimitService = new RateLimitService(properties);
+        Cache<String, double[]> rateLimitCache = Caffeine.newBuilder()
+                .maximumSize(1000)
+                .expireAfterAccess(1, TimeUnit.HOURS)
+                .build();
+
+        rateLimitService = new RateLimitService(properties, rateLimitCache);
         rateLimitService.init();
     }
 

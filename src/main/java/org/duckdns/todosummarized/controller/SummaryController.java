@@ -63,11 +63,15 @@ public class SummaryController {
 
     /**
      * Get AI-generated summary for the authenticated user.
+     * Returns cached insight if available and matches the requested type.
+     * Otherwise generates a new insight and caches it.
      * Falls back to metrics-only if AI is disabled or fails.
      */
     @Operation(
             summary = "Get AI-generated summary",
-            description = "Generates an AI-powered summary of the user's todos based on the selected summary type. " +
+            description = "Returns the user's AI insight with cache-first strategy. " +
+                    "If a cached insight exists and matches the requested type, returns it immediately (no AI call). " +
+                    "Otherwise generates a new AI-powered summary and caches it. " +
                     "Supports multiple AI providers (OpenAI, Gemini) with automatic failover. " +
                     "Falls back to metrics-only if AI is disabled or encounters an error."
     )
