@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<nav th:fragment="navbar(currentPage)" class="navbar">
+    <div class="navbar-container">
+        <a th:href="@{/dashboard}" class="navbar-brand">
+            <span class="brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </span>
+            <span th:text="${appName}">Todo Summarized</span>
+        </a>
+        <div class="navbar-nav">
+            <a th:href="@{/dashboard}" class="nav-link" th:classappend="${currentPage == 'dashboard'} ? 'active' : ''">Dashboard</a>
+            <a th:href="@{/summary}" class="nav-link" th:classappend="${currentPage == 'summary'} ? 'active' : ''">Summary</a>
+        </div>
+        <div class="navbar-user">
+            <span class="user-email" id="userEmail"></span>
+            <button class="btn btn-ghost btn-sm" id="logoutBtn">Logout</button>
+        </div>
+        <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+    <div class="navbar-menu" id="navbarMenu">
+        <a th:href="@{/dashboard}" class="nav-link" th:classappend="${currentPage == 'dashboard'} ? 'active' : ''">Dashboard</a>
+        <a th:href="@{/summary}" class="nav-link" th:classappend="${currentPage == 'summary'} ? 'active' : ''">Summary</a>
+        <div class="navbar-user-mobile">
+            <span class="user-email" id="userEmailMobile"></span>
+            <button class="btn btn-secondary btn-sm" id="logoutBtnMobile">Logout</button>
+        </div>
+    </div>
+</nav>
+
+</body>
+</html>
+
