@@ -80,11 +80,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Skip JWT filter for public authentication endpoints.
+     * Skip JWT filter for public endpoints.
      */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return path.startsWith("/api/auth/");
+        return path.startsWith("/api/auth/")
+                || path.startsWith("/api/meta/")
+                || path.equals("/api/summary/types")
+                || path.equals("/api/summary/ai/status")
+                || path.startsWith("/css/")
+                || path.startsWith("/js/")
+                || path.startsWith("/images/")
+                || path.equals("/favicon.ico");
     }
 }

@@ -35,16 +35,20 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
     @Column(nullable = false)
+    @Builder.Default
     private boolean enabled = true;
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
     @Column(nullable = false)
     private LocalDateTime updatedAt;
     @Column(nullable = false)
+    @Builder.Default
     private boolean accountNonExpired = true;
     @Column(nullable = false)
+    @Builder.Default
     private boolean accountNonLocked = true;
     @Column(nullable = false)
+    @Builder.Default
     private boolean credentialsNonExpired = true;
 
     @PrePersist
