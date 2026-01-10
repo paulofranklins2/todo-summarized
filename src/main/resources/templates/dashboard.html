@@ -12,36 +12,20 @@
 <main class="main-content">
     <div class="dashboard-container">
 
-        <!-- Header Actions -->
-        <div class="dashboard-actions">
-            <button class="btn btn-secondary" id="statsBtn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="20" x2="18" y2="10"></line>
-                    <line x1="12" y1="20" x2="12" y2="4"></line>
-                    <line x1="6" y1="20" x2="6" y2="14"></line>
-                </svg>
-                <span>Stats</span>
-            </button>
-            <button class="btn btn-primary" id="aiInsightsBtn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
-                </svg>
-                <span>AI Insights</span>
-            </button>
-        </div>
-
-        <!-- Quick Add Task -->
-        <div class="quick-add">
-            <input type="text" id="quickAddInput" class="quick-add-input" placeholder="What needs to be done?"
-                   maxlength="255">
-            <button class="btn btn-primary quick-add-btn" id="quickAddBtn">Add Task</button>
-        </div>
-
-        <!-- Filters -->
-        <div class="filters-row">
-            <select id="filterStatus" class="filter-select" aria-label="Filter by status"></select>
-            <select id="filterPriority" class="filter-select" aria-label="Filter by priority"></select>
-            <button class="btn btn-ghost btn-sm" id="clearFiltersBtn">Clear filters</button>
+        <!-- Input + Filters + Actions Group -->
+        <div class="input-filters-group">
+            <div class="quick-add">
+                <input type="text" id="quickAddInput" class="quick-add-input" placeholder="What needs to be done?" maxlength="255">
+                <button class="btn btn-primary quick-add-btn" id="quickAddBtn">Add</button>
+            </div>
+            <div class="filters-row">
+                <select id="filterStatus" class="filter-select" aria-label="Filter by status"></select>
+                <select id="filterPriority" class="filter-select" aria-label="Filter by priority"></select>
+                <button class="btn btn-ghost btn-sm" id="clearFiltersBtn">Clear</button>
+                <div class="filters-spacer"></div>
+                <button class="btn btn-ghost btn-sm" id="statsBtn">Stats</button>
+                <button class="btn btn-primary btn-sm" id="aiInsightsBtn">AI Insights</button>
+            </div>
         </div>
 
         <!-- Todo List -->
