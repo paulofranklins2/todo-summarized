@@ -21,6 +21,15 @@ openai:
   temperature: ${OPENAI_TEMPERATURE:0.7}
   timeout-seconds: ${OPENAI_TIMEOUT_SECONDS:30}
 
+# Gemini Configuration (alternative to OpenAI)
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: ${GEMINI_MODEL:gemini-2.5-flash-lite}
+  enabled: ${GEMINI_ENABLED:false}
+  max-tokens: ${GEMINI_MAX_TOKENS:500}
+  temperature: ${GEMINI_TEMPERATURE:0.7}
+  timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:30}
+
 #Rate Limitation Config
 ratelimit:
   enabled: ${RATELIMIT_ENABLED:true}

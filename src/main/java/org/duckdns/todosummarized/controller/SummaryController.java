@@ -9,12 +9,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.duckdns.todosummarized.domains.entity.User;
+import org.duckdns.todosummarized.domains.enums.AiProvider;
 import org.duckdns.todosummarized.domains.enums.SummaryType;
 import org.duckdns.todosummarized.dto.AiSummaryDTO;
 import org.duckdns.todosummarized.dto.DailySummaryDTO;
 import org.duckdns.todosummarized.dto.SummaryTypeDTO;
 import org.duckdns.todosummarized.ratelimit.RateLimit;
 import org.duckdns.todosummarized.service.AiSummaryService;
+import org.duckdns.todosummarized.service.AiProviderSelector;
 import org.duckdns.todosummarized.service.SummaryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -65,6 +68,7 @@ public class SummaryController {
     @Operation(
             summary = "Get AI-generated summary",
             description = "Generates an AI-powered summary of the user's todos based on the selected summary type. " +
+                    "Supports multiple AI providers (OpenAI, Gemini) with automatic failover. " +
                     "Falls back to metrics-only if AI is disabled or encounters an error."
     )
     @ApiResponse(
@@ -81,9 +85,11 @@ public class SummaryController {
     public ResponseEntity<AiSummaryDTO> getAiSummary(
             @AuthenticationPrincipal User user,
             @Parameter(description = "Summary type/persona", example = "DEVELOPER")
-            @RequestParam(defaultValue = "DEVELOPER") SummaryType type
+            @RequestParam(defaultValue = "DEVELOPER") SummaryType type,
+            @Parameter(description = "AI provider (AUTO, OPENAI, GEMINI)", example = "AUTO")
+            @RequestParam(defaultValue = "AUTO") AiProvider provider
     ) {
-        AiSummaryDTO summary = aiSummaryService.getAiSummary(user, type);
+        AiSummaryDTO summary = aiSummaryService.getAiSummary(user, type, provider);
         return ResponseEntity.ok(summary);
     }
 
@@ -109,15 +115,29 @@ public class SummaryController {
      */
     @Operation(
             summary = "Check AI availability",
-            description = "Returns whether the AI summary feature is currently enabled and available."
+            description = "Returns whether the AI summary feature is currently enabled and available, " +
+                    "including detailed information about each AI provider."
     )
     @ApiResponse(
             responseCode = "200",
             description = "Status retrieved successfully"
     )
     @GetMapping("/ai/status")
-    public ResponseEntity<Map<String, Boolean>> getAiStatus() {
-        return ResponseEntity.ok(Map.of("available", aiSummaryService.isAiAvailable()));
+    public ResponseEntity<Map<String, Object>> getAiStatus() {
+        AiProviderSelector.ProviderInfo[] providerInfo = aiSummaryService.getProviderInfo();
+        List<Map<String, Object>> providers = Arrays.stream(providerInfo)
+                .map(info -> Map.<String, Object>of(
+                        "provider", info.provider().name(),
+                        "displayName", info.provider().getDisplayName(),
+                        "available", info.available(),
+                        "model", info.model() != null ? info.model() : ""
+                ))
+                .toList();
+
+        return ResponseEntity.ok(Map.of(
+                "available", aiSummaryService.isAiAvailable(),
+                "providers", providers
+        ));
     }
 }
 

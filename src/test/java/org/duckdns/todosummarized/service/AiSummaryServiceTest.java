@@ -1,6 +1,7 @@
 package org.duckdns.todosummarized.service;
 
 import org.duckdns.todosummarized.domains.entity.User;
+import org.duckdns.todosummarized.domains.enums.AiProvider;
 import org.duckdns.todosummarized.domains.enums.Role;
 import org.duckdns.todosummarized.domains.enums.SummaryType;
 import org.duckdns.todosummarized.dto.AiSummaryDTO;
@@ -21,7 +22,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,7 +34,7 @@ class AiSummaryServiceTest {
     private SummaryService summaryService;
 
     @Mock
-    private AiSummaryAdapter aiAdapter;
+    private AiProviderSelector providerSelector;
 
     @Mock
     private Clock clock;
@@ -85,10 +85,10 @@ class AiSummaryServiceTest {
         @DisplayName("should return AI-generated summary when AI is enabled and succeeds")
         void shouldReturnAiGeneratedSummary() {
             when(summaryService.getDailySummary(user)).thenReturn(sampleMetrics);
-            when(aiAdapter.isEnabled()).thenReturn(true);
-            when(aiAdapter.generateSummary(sampleMetrics, SummaryType.DEVELOPER))
-                    .thenReturn(Optional.of("AI generated summary text"));
-            when(aiAdapter.getModel()).thenReturn("gpt-4o-mini");
+            when(providerSelector.isProviderAvailable(AiProvider.AUTO)).thenReturn(true);
+            when(providerSelector.generateSummary(sampleMetrics, SummaryType.DEVELOPER, AiProvider.AUTO))
+                    .thenReturn(AiProviderSelector.AiGenerationResult.success(
+                            "AI generated summary text", "gpt-4o-mini", AiProvider.OPENAI));
 
             AiSummaryDTO result = aiSummaryService.getAiSummary(user, SummaryType.DEVELOPER);
 
@@ -105,15 +105,15 @@ class AiSummaryServiceTest {
         @DisplayName("should return fallback when AI is disabled")
         void shouldReturnFallbackWhenDisabled() {
             when(summaryService.getDailySummary(user)).thenReturn(sampleMetrics);
-            when(aiAdapter.isEnabled()).thenReturn(false);
-            when(aiAdapter.getUnavailableReason()).thenReturn("AI summary feature is disabled");
+            when(providerSelector.isProviderAvailable(AiProvider.AUTO)).thenReturn(false);
+            when(providerSelector.getAggregatedUnavailableReason()).thenReturn("All AI providers are disabled");
 
             AiSummaryDTO result = aiSummaryService.getAiSummary(user, SummaryType.EXECUTIVE);
 
             assertFalse(result.aiGenerated());
             assertNull(result.summary());
             assertNull(result.model());
-            assertEquals("AI summary feature is disabled", result.fallbackReason());
+            assertEquals("All AI providers are disabled", result.fallbackReason());
             assertEquals(SummaryType.EXECUTIVE, result.summaryType());
             assertNotNull(result.metrics());
         }
@@ -122,10 +122,9 @@ class AiSummaryServiceTest {
         @DisplayName("should return fallback when AI generation fails")
         void shouldReturnFallbackWhenGenerationFails() {
             when(summaryService.getDailySummary(user)).thenReturn(sampleMetrics);
-            when(aiAdapter.isEnabled()).thenReturn(true);
-            when(aiAdapter.generateSummary(sampleMetrics, SummaryType.STUDENT))
-                    .thenReturn(Optional.empty());
-            when(aiAdapter.getUnavailableReason()).thenReturn("AI service encountered an error");
+            when(providerSelector.isProviderAvailable(AiProvider.AUTO)).thenReturn(true);
+            when(providerSelector.generateSummary(sampleMetrics, SummaryType.STUDENT, AiProvider.AUTO))
+                    .thenReturn(AiProviderSelector.AiGenerationResult.failure("AI service encountered an error"));
 
             AiSummaryDTO result = aiSummaryService.getAiSummary(user, SummaryType.STUDENT);
 
@@ -138,9 +137,10 @@ class AiSummaryServiceTest {
         @DisplayName("should include date in response")
         void shouldIncludeDateInResponse() {
             when(summaryService.getDailySummary(user)).thenReturn(sampleMetrics);
-            when(aiAdapter.isEnabled()).thenReturn(true);
-            when(aiAdapter.generateSummary(any(), any())).thenReturn(Optional.of("Summary"));
-            when(aiAdapter.getModel()).thenReturn("gpt-4o-mini");
+            when(providerSelector.isProviderAvailable(AiProvider.AUTO)).thenReturn(true);
+            when(providerSelector.generateSummary(any(), any(), any()))
+                    .thenReturn(AiProviderSelector.AiGenerationResult.success(
+                            "Summary", "gpt-4o-mini", AiProvider.OPENAI));
 
             AiSummaryDTO result = aiSummaryService.getAiSummary(user, SummaryType.DEVELOPER);
 
@@ -201,7 +201,7 @@ class AiSummaryServiceTest {
         @Test
         @DisplayName("should return true when AI is enabled")
         void shouldReturnTrueWhenEnabled() {
-            when(aiAdapter.isEnabled()).thenReturn(true);
+            when(providerSelector.isAnyProviderAvailable()).thenReturn(true);
 
             assertTrue(aiSummaryService.isAiAvailable());
         }
@@ -209,7 +209,7 @@ class AiSummaryServiceTest {
         @Test
         @DisplayName("should return false when AI is disabled")
         void shouldReturnFalseWhenDisabled() {
-            when(aiAdapter.isEnabled()).thenReturn(false);
+            when(providerSelector.isAnyProviderAvailable()).thenReturn(false);
 
             assertFalse(aiSummaryService.isAiAvailable());
         }

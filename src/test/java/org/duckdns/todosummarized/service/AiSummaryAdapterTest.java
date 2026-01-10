@@ -26,7 +26,9 @@ class AiSummaryAdapterTest {
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private AiSummaryAdapter aiSummaryAdapter;
+    private AiSummaryMessageBuilder messageBuilder = new AiSummaryMessageBuilder();
+
+    private OpenAiSummaryAdapter aiSummaryAdapter;
 
     private DailySummaryDTO sampleMetrics;
 
@@ -37,7 +39,7 @@ class AiSummaryAdapterTest {
         when(openAiProperties.getModel()).thenReturn("gpt-4o-mini");
         when(openAiProperties.isEnabled()).thenReturn(true);
 
-        aiSummaryAdapter = new AiSummaryAdapter(openAiProperties, objectMapper);
+        aiSummaryAdapter = new OpenAiSummaryAdapter(openAiProperties, objectMapper, messageBuilder);
         aiSummaryAdapter.initHttpClient();
 
         sampleMetrics = DailySummaryDTO.builder()
@@ -145,7 +147,7 @@ class AiSummaryAdapterTest {
 
             String reason = aiSummaryAdapter.getUnavailableReason();
 
-            assertEquals("AI summary feature is disabled", reason);
+            assertEquals("OpenAI AI summary feature is disabled", reason);
         }
 
         @Test
@@ -178,7 +180,7 @@ class AiSummaryAdapterTest {
 
             String reason = aiSummaryAdapter.getUnavailableReason();
 
-            assertEquals("AI service encountered an error", reason);
+            assertEquals("OpenAI AI service encountered an error", reason);
         }
     }
 }

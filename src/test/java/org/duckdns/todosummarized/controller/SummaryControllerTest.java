@@ -1,11 +1,13 @@
 package org.duckdns.todosummarized.controller;
 
 import org.duckdns.todosummarized.domains.entity.User;
+import org.duckdns.todosummarized.domains.enums.AiProvider;
 import org.duckdns.todosummarized.domains.enums.Role;
 import org.duckdns.todosummarized.domains.enums.SummaryType;
 import org.duckdns.todosummarized.dto.AiSummaryDTO;
 import org.duckdns.todosummarized.dto.DailySummaryDTO;
 import org.duckdns.todosummarized.dto.SummaryTypeDTO;
+import org.duckdns.todosummarized.service.AiProviderSelector;
 import org.duckdns.todosummarized.service.AiSummaryService;
 import org.duckdns.todosummarized.service.SummaryService;
 import org.junit.jupiter.api.BeforeEach;
@@ -150,9 +152,9 @@ class SummaryControllerTest {
                     metrics
             );
 
-            when(aiSummaryService.getAiSummary(user, SummaryType.DEVELOPER)).thenReturn(aiSummary);
+            when(aiSummaryService.getAiSummary(user, SummaryType.DEVELOPER, AiProvider.AUTO)).thenReturn(aiSummary);
 
-            ResponseEntity<AiSummaryDTO> response = summaryController.getAiSummary(user, SummaryType.DEVELOPER);
+            ResponseEntity<AiSummaryDTO> response = summaryController.getAiSummary(user, SummaryType.DEVELOPER, AiProvider.AUTO);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
@@ -171,9 +173,9 @@ class SummaryControllerTest {
                     metrics
             );
 
-            when(aiSummaryService.getAiSummary(user, SummaryType.EXECUTIVE)).thenReturn(fallback);
+            when(aiSummaryService.getAiSummary(user, SummaryType.EXECUTIVE, AiProvider.AUTO)).thenReturn(fallback);
 
-            ResponseEntity<AiSummaryDTO> response = summaryController.getAiSummary(user, SummaryType.EXECUTIVE);
+            ResponseEntity<AiSummaryDTO> response = summaryController.getAiSummary(user, SummaryType.EXECUTIVE, AiProvider.AUTO);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertFalse(response.getBody().aiGenerated());
@@ -210,22 +212,30 @@ class SummaryControllerTest {
         @DisplayName("returns 200 with available true when AI is enabled")
         void getAiStatus_returnsAvailableTrue() {
             when(aiSummaryService.isAiAvailable()).thenReturn(true);
+            when(aiSummaryService.getProviderInfo()).thenReturn(new AiProviderSelector.ProviderInfo[]{
+                    new AiProviderSelector.ProviderInfo(AiProvider.OPENAI, true, "gpt-4o-mini"),
+                    new AiProviderSelector.ProviderInfo(AiProvider.GEMINI, false, "gemini-1.5-flash")
+            });
 
-            ResponseEntity<Map<String, Boolean>> response = summaryController.getAiStatus();
+            ResponseEntity<Map<String, Object>> response = summaryController.getAiStatus();
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
-            assertTrue(response.getBody().get("available"));
+            assertTrue((Boolean) response.getBody().get("available"));
         }
 
         @Test
         @DisplayName("returns 200 with available false when AI is disabled")
         void getAiStatus_returnsAvailableFalse() {
             when(aiSummaryService.isAiAvailable()).thenReturn(false);
+            when(aiSummaryService.getProviderInfo()).thenReturn(new AiProviderSelector.ProviderInfo[]{
+                    new AiProviderSelector.ProviderInfo(AiProvider.OPENAI, false, "gpt-4o-mini"),
+                    new AiProviderSelector.ProviderInfo(AiProvider.GEMINI, false, "gemini-1.5-flash")
+            });
 
-            ResponseEntity<Map<String, Boolean>> response = summaryController.getAiStatus();
+            ResponseEntity<Map<String, Object>> response = summaryController.getAiStatus();
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
-            assertFalse(response.getBody().get("available"));
+            assertFalse((Boolean) response.getBody().get("available"));
         }
     }
 
