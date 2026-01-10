@@ -70,6 +70,7 @@ A modern, full-stack Todo application with AI-powered insights. Built with Sprin
 
 ### Mobile
 * Responsive design for seamless mobile experience.
+
 ![Mobile 1](docs/images/mobile-1.png)
 ![Mobile 2](docs/images/mobile-2.png)
 ![Mobile 3](docs/images/mobile-3.png)
