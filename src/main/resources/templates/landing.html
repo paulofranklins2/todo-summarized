@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" th:attr="data-api-base=${apiBase}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${appName}">Todo Summarized</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        /* Landing Page Styles */
+        .landing-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--color-border);
+            padding: var(--space-4) 0;
+        }
+
+        .landing-nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--space-6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .landing-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-weight: 700;
+            font-size: var(--text-lg);
+            color: var(--color-text);
+        }
+
+        .landing-logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--color-primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .landing-nav-links {
+            display: flex;
+            gap: var(--space-2);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 160px var(--space-6) 80px;
+            text-align: center;
+            background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-bg) 100%);
+        }
+
+        .hero-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-4);
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 9999px;
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-6);
+        }
+
+        .hero-badge-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--color-success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: var(--space-6);
+            color: var(--color-text);
+        }
+
+        .hero h1 span {
+            color: var(--color-primary);
+        }
+
+        .hero-subtitle {
+            font-size: var(--text-lg);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-8);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: var(--space-4);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-hero {
+            padding: var(--space-4) var(--space-8);
+            font-size: var(--text-base);
+            font-weight: 600;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px var(--space-6);
+            background: var(--color-surface);
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: var(--space-12);
+        }
+
+        .section-header h2 {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            margin-bottom: var(--space-4);
+        }
+
+        .section-header p {
+            color: var(--color-text-secondary);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-6);
+        }
+
+        .feature-card {
+            padding: var(--space-6);
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--color-primary-light);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-4);
+            color: var(--color-primary);
+        }
+
+        .feature-card h3 {
+            font-size: var(--text-lg);
+            margin-bottom: var(--space-2);
+        }
+
+        .feature-card p {
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+            line-height: 1.6;
+        }
+
+        /* Demo Section */
+        .demo {
+            padding: 80px var(--space-6);
+            background: var(--color-bg);
+        }
+
+        .demo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .demo-window {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .demo-header {
+            background: var(--color-surface-hover);
+            padding: var(--space-3) var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .demo-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .demo-dot-red { background: #FF5F56; }
+        .demo-dot-yellow { background: #FFBD2E; }
+        .demo-dot-green { background: #27CA40; }
+
+        .demo-content {
+            padding: var(--space-6);
+        }
+
+        .demo-todo-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .demo-todo-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3) var(--space-4);
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+        }
+
+        .demo-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--color-border);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .demo-checkbox.checked {
+            background: var(--color-success);
+            border-color: var(--color-success);
+            color: white;
+        }
+
+        .demo-todo-text {
+            flex: 1;
+        }
+
+        .demo-todo-text.completed {
+            text-decoration: line-through;
+            color: var(--color-text-muted);
+        }
+
+        /* AI Demo */
+        .demo-ai-box {
+            margin-top: var(--space-6);
+            padding: var(--space-4);
+            background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-surface) 100%);
+            border-left: 4px solid var(--color-primary);
+            border-radius: var(--radius);
+        }
+
+        .demo-ai-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-bottom: var(--space-3);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .demo-ai-content {
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+
+        /* CTA Section */
+        .cta {
+            padding: 80px var(--space-6);
+            background: var(--color-primary);
+            text-align: center;
+        }
+
+        .cta-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cta h2 {
+            font-size: var(--text-2xl);
+            color: white;
+            margin-bottom: var(--space-4);
+        }
+
+        .cta p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: var(--space-6);
+        }
+
+        .btn-cta {
+            background: white;
+            color: var(--color-primary);
+            padding: var(--space-4) var(--space-8);
+            font-size: var(--text-base);
+            font-weight: 600;
+        }
+
+        .btn-cta:hover {
+            background: var(--color-bg);
+        }
+
+        /* Footer */
+        .landing-footer {
+            padding: var(--space-6);
+            background: var(--color-surface);
+            border-top: 1px solid var(--color-border);
+            text-align: center;
+        }
+
+        .landing-footer p {
+            color: var(--color-text-muted);
+            font-size: var(--text-sm);
+        }
+
+        /* Auth Modal Footer */
+        .auth-modal-footer {
+            margin-top: var(--space-6);
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--color-border);
+            text-align: center;
+        }
+
+        .auth-modal-footer p {
+            color: var(--color-text-muted);
+            font-size: var(--text-sm);
+            margin: 0;
+        }
+
+        .auth-modal-footer a {
+            color: var(--color-primary);
+            font-weight: 500;
+        }
+
+        .auth-modal-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero {
+                padding: 120px var(--space-4) 60px;
+            }
+
+            .features, .demo, .cta {
+                padding: 60px var(--space-4);
+            }
+
+            .landing-nav-container {
+                padding: 0 var(--space-4);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="landing-nav">
+        <div class="landing-nav-container">
+            <a href="/" class="landing-logo">
+                <span class="landing-logo-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </span>
+                <span th:text="${appName}">Todo Summarized</span>
+            </a>
+            <div class="landing-nav-links">
+                <button class="btn btn-ghost" id="navLoginBtn">Login</button>
+                <button class="btn btn-primary" id="navRegisterBtn">Get Started</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                <span>AI-Powered Task Management</span>
+            </div>
+            <h1>Organize Tasks.<br><span>Get AI Insights.</span></h1>
+            <p class="hero-subtitle">
+                A simple, powerful todo app that helps you stay organized and provides
+                intelligent summaries of your tasks using AI.
+            </p>
+            <div class="hero-cta">
+                <button class="btn btn-primary btn-hero" id="heroRegisterBtn">Start Free</button>
+                <button class="btn btn-secondary btn-hero" id="heroLoginBtn">Sign In</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="features-container">
+            <div class="section-header">
+                <h2>Everything you need to stay productive</h2>
+                <p>Simple yet powerful features to manage your daily tasks effectively.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                    </div>
+                    <h3>Quick Add Tasks</h3>
+                    <p>Add tasks in seconds with our streamlined interface. Just type and press enter to create a new task instantly.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <h3>Due Dates & Priorities</h3>
+                    <p>Set due dates and priority levels to keep track of what's important and never miss a deadline.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3>AI Insights</h3>
+                    <p>Get personalized AI-generated summaries and insights about your tasks to help you plan better.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                    </div>
+                    <h3>Progress Tracking</h3>
+                    <p>View your completion rate, track overdue tasks, and see breakdowns by status and priority.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                    </div>
+                    <h3>Status Management</h3>
+                    <p>Track tasks through their lifecycle - from not started, to in progress, to completed.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </div>
+                    <h3>Works Everywhere</h3>
+                    <p>Responsive design that works beautifully on desktop, tablet, and mobile devices.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="demo">
+        <div class="demo-container">
+            <div class="section-header">
+                <h2>See it in action</h2>
+                <p>A clean, intuitive interface that gets out of your way.</p>
+            </div>
+            <div class="demo-window">
+                <div class="demo-header">
+                    <span class="demo-dot demo-dot-red"></span>
+                    <span class="demo-dot demo-dot-yellow"></span>
+                    <span class="demo-dot demo-dot-green"></span>
+                </div>
+                <div class="demo-content">
+                    <div class="demo-todo-list">
+                        <div class="demo-todo-item">
+                            <div class="demo-checkbox checked">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                            <span class="demo-todo-text completed">Review project requirements</span>
+                            <span class="badge badge-status-completed">Completed</span>
+                        </div>
+                        <div class="demo-todo-item">
+                            <div class="demo-checkbox checked">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                            <span class="demo-todo-text completed">Set up development environment</span>
+                            <span class="badge badge-status-completed">Completed</span>
+                        </div>
+                        <div class="demo-todo-item">
+                            <div class="demo-checkbox"></div>
+                            <span class="demo-todo-text">Build user authentication</span>
+                            <span class="badge badge-priority-high">High</span>
+                        </div>
+                        <div class="demo-todo-item">
+                            <div class="demo-checkbox"></div>
+                            <span class="demo-todo-text">Design dashboard layout</span>
+                            <span class="badge badge-priority-medium">Medium</span>
+                        </div>
+                        <div class="demo-todo-item">
+                            <div class="demo-checkbox"></div>
+                            <span class="demo-todo-text">Write API documentation</span>
+                            <span class="badge badge-priority-low">Low</span>
+                        </div>
+                    </div>
+
+                    <div class="demo-ai-box">
+                        <div class="demo-ai-header">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"></path>
+                            </svg>
+                            AI Insights
+                        </div>
+                        <div class="demo-ai-content">
+                            <strong>Great progress!</strong> You've completed 2 out of 5 tasks (40%).
+                            Focus on "Build user authentication" next as it's marked high priority.
+                            You're on track to finish this project by the end of the week!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="cta-container">
+            <h2>Ready to get organized?</h2>
+            <p>Start managing your tasks smarter today. It's free to get started.</p>
+            <button class="btn btn-cta" id="ctaRegisterBtn">Create Free Account</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+        <p th:text="'© 2026 ' + ${appName} + '. All rights reserved.'">© 2026 Todo Summarized. All rights reserved.</p>
+    </footer>
+
+    <!-- Auth Modals -->
+    <div th:replace="~{login :: modal}"></div>
+    <div th:replace="~{register :: modal}"></div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script th:src="@{/js/api.js}"></script>
+    <script th:src="@{/js/auth.js}"></script>
+    <script th:src="@{/js/utils.js}"></script>
+    <script th:replace="~{login :: modal-scripts}"></script>
+    <script th:replace="~{register :: modal-scripts}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if already authenticated
+            if (Auth.isAuthenticated()) {
+                window.location.href = '/dashboard';
+                return;
+            }
+
+            // Initialize modals
+            LoginModal.init();
+            RegisterModal.init();
+
+            // Nav buttons
+            document.getElementById('navLoginBtn')?.addEventListener('click', () => LoginModal.open());
+            document.getElementById('navRegisterBtn')?.addEventListener('click', () => RegisterModal.open());
+
+            // Hero buttons
+            document.getElementById('heroLoginBtn')?.addEventListener('click', () => LoginModal.open());
+            document.getElementById('heroRegisterBtn')?.addEventListener('click', () => RegisterModal.open());
+
+            // CTA button
+            document.getElementById('ctaRegisterBtn')?.addEventListener('click', () => RegisterModal.open());
+
+            // Check URL params for modal triggers
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('login') === 'true') {
+                LoginModal.open();
+            } else if (urlParams.get('register') === 'true') {
+                RegisterModal.open();
+            }
+        });
+    </script>
+</body>
+</html>
+
