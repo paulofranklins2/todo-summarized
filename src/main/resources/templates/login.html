@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" th:attr="data-api-base=${apiBase}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Login | ' + ${appName}">Login | Todo Summarized</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="auth-page">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+            <h1 th:text="${appName}">Todo Summarized</h1>
+            <p>Sign in to your account</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" name="email" class="form-control"
+                       placeholder="Enter your email" required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-control"
+                       placeholder="Enter your password" required autocomplete="current-password">
+            </div>
+
+            <div class="form-error hidden" id="errorMessage"></div>
+
+            <button type="submit" class="btn btn-primary btn-full btn-lg" id="submitBtn">
+                Sign In
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Don't have an account? <a th:href="@{/register}">Sign up</a></p>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script th:src="@{/js/api.js}"></script>
+    <script th:src="@{/js/auth.js}"></script>
+    <script th:src="@{/js/utils.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('expired') === 'true' || urlParams.get('logout') === 'true') {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('userEmail');
+            }
+
+            if (Auth.isAuthenticated()) {
+                window.location.href = '/dashboard';
+                return;
+            }
+
+            const form = document.getElementById('loginForm');
+            const errorEl = document.getElementById('errorMessage');
+            const submitBtn = document.getElementById('submitBtn');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorEl.classList.add('hidden');
+                Utils.setButtonLoading(submitBtn, true);
+
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+
+                try {
+                    const response = await Api.auth.signin({ email, password });
+                    Auth.setTokens(response);
+                    Toast.success('Login successful!');
+                    window.location.href = '/dashboard';
+                } catch (error) {
+                    errorEl.textContent = error.message || 'Invalid credentials';
+                    errorEl.classList.remove('hidden');
+                    Utils.setButtonLoading(submitBtn, false);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

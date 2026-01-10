@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<th:block th:fragment="modals">
+    <!-- View/Edit Modal -->
+    <div class="modal-overlay" id="todoModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Task Details</h2>
+                <button class="modal-close" id="modalCloseBtn">&times;</button>
+            </div>
+
+            <!-- View Mode -->
+            <div id="viewMode">
+                <div class="modal-body">
+                    <div class="todo-detail">
+                        <h3 id="viewTitle" class="todo-detail-title"></h3>
+                        <p id="viewDescription" class="todo-detail-description text-muted"></p>
+
+                        <div class="todo-detail-meta">
+                            <div class="todo-detail-row">
+                                <span class="todo-detail-label">Status</span>
+                                <span id="viewStatus"></span>
+                            </div>
+                            <div class="todo-detail-row">
+                                <span class="todo-detail-label">Priority</span>
+                                <span id="viewPriority"></span>
+                            </div>
+                            <div class="todo-detail-row">
+                                <span class="todo-detail-label">Due Date</span>
+                                <span id="viewDueDate" class="text-muted"></span>
+                            </div>
+                            <div class="todo-detail-row">
+                                <span class="todo-detail-label">Created</span>
+                                <span id="viewCreatedAt" class="text-muted"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer todo-detail-actions">
+                    <button type="button" class="btn btn-danger" id="viewDeleteBtn">Delete</button>
+                    <div style="flex: 1;"></div>
+                    <button type="button" class="btn btn-secondary" id="viewEditBtn">Edit</button>
+                    <button type="button" class="btn btn-primary" id="viewToggleStatusBtn">Mark Done</button>
+                </div>
+            </div>
+
+            <!-- Edit Mode -->
+            <form id="todoForm" class="hidden">
+                <div class="modal-body">
+                    <input type="hidden" id="todoId">
+                    <div class="form-group">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" id="title" name="title" class="form-control" required maxlength="255">
+                    </div>
+                    <div class="form-group">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea id="description" name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="status" class="form-label">Status</label>
+                            <select id="status" name="status" class="form-control"></select>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select id="priority" name="priority" class="form-control"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dueDate" class="form-label">Due Date</label>
+                        <input type="datetime-local" id="dueDate" name="dueDate" class="form-control">
+                    </div>
+                    <div class="form-error hidden" id="formError"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal" style="max-width: 360px;">
+            <div class="modal-header">
+                <h2>Delete Task</h2>
+                <button class="modal-close" id="deleteModalCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Delete "<strong id="deleteTodoTitle"></strong>"?</p>
+                <p class="text-muted" style="font-size: var(--text-sm);">This cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="deleteCancelBtn">Cancel</button>
+                <button type="button" class="btn btn-danger" id="deleteConfirmBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<!-- Modal JavaScript -->
+<script th:fragment="modal-scripts">
+    // Todo Modal State
+    let currentTodo = null;
+    let isEditMode = false;
+
+    function initTodoModals() {
+        Modal.init('todoModal', null, ['modalCloseBtn']);
+        Modal.init('deleteModal', null, ['deleteModalCloseBtn', 'deleteCancelBtn']);
+
+        document.getElementById('viewEditBtn').addEventListener('click', switchToEditMode);
+        document.getElementById('viewDeleteBtn').addEventListener('click', openDeleteFromView);
+        document.getElementById('viewToggleStatusBtn').addEventListener('click', toggleStatusFromView);
+        document.getElementById('cancelEditBtn').addEventListener('click', switchToViewMode);
+        document.getElementById('todoForm').addEventListener('submit', handleFormSubmit);
+        document.getElementById('deleteConfirmBtn').addEventListener('click', handleDelete);
+    }
+
+    async function openTodoModal(id) {
+        try {
+            currentTodo = await Api.todos.get(id);
+            showViewMode();
+            Modal.open('todoModal');
+        } catch (error) {
+            Toast.error('Failed to load task');
+        }
+    }
+
+    function showViewMode() {
+        isEditMode = false;
+        document.getElementById('viewMode').classList.remove('hidden');
+        document.getElementById('todoForm').classList.add('hidden');
+        document.getElementById('modalTitle').textContent = 'Task Details';
+
+        const todo = currentTodo;
+        document.getElementById('viewTitle').textContent = todo.title;
+        document.getElementById('viewDescription').textContent = todo.description || 'No description';
+        document.getElementById('viewStatus').innerHTML = Components.statusBadge(todo.status);
+        document.getElementById('viewPriority').innerHTML = Components.priorityBadge(todo.priority);
+        document.getElementById('viewDueDate').textContent = Utils.formatDate(todo.dueDate) || 'Not set';
+        document.getElementById('viewCreatedAt').textContent = Utils.formatDate(todo.createdAt);
+
+        // Update toggle button text
+        const toggleBtn = document.getElementById('viewToggleStatusBtn');
+        if (todo.status === 'COMPLETED') {
+            toggleBtn.textContent = 'Mark Undone';
+            toggleBtn.classList.remove('btn-primary');
+            toggleBtn.classList.add('btn-secondary');
+        } else {
+            toggleBtn.textContent = 'Mark Done';
+            toggleBtn.classList.remove('btn-secondary');
+            toggleBtn.classList.add('btn-primary');
+        }
+
+        // Disable toggle for cancelled todos
+        toggleBtn.disabled = todo.status === 'CANCELLED';
+    }
+
+    function switchToEditMode() {
+        isEditMode = true;
+        document.getElementById('viewMode').classList.add('hidden');
+        document.getElementById('todoForm').classList.remove('hidden');
+        document.getElementById('modalTitle').textContent = 'Edit Task';
+
+        const todo = currentTodo;
+        document.getElementById('todoId').value = todo.id;
+        document.getElementById('title').value = todo.title;
+        document.getElementById('description').value = todo.description || '';
+        document.getElementById('status').value = todo.status;
+        document.getElementById('priority').value = todo.priority;
+        document.getElementById('dueDate').value = Utils.formatDateForInput(todo.dueDate);
+        document.getElementById('formError').classList.add('hidden');
+    }
+
+    function switchToViewMode() {
+        showViewMode();
+    }
+
+    function openDeleteFromView() {
+        document.getElementById('deleteTodoTitle').textContent = currentTodo.title;
+        Modal.open('deleteModal');
+    }
+
+    async function toggleStatusFromView() {
+        const btn = document.getElementById('viewToggleStatusBtn');
+        const newStatus = currentTodo.status === 'COMPLETED' ? 'NOT_STARTED' : 'COMPLETED';
+
+        Utils.setButtonLoading(btn, true);
+        try {
+            await Api.todos.updateStatus(currentTodo.id, newStatus);
+            Toast.success(newStatus === 'COMPLETED' ? 'Marked as done' : 'Marked as undone');
+            Modal.close('todoModal');
+            await loadData();
+        } catch (error) {
+            Toast.error('Failed to update');
+        } finally {
+            Utils.setButtonLoading(btn, false);
+        }
+    }
+
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+        const saveBtn = document.getElementById('saveBtn');
+        const errorEl = document.getElementById('formError');
+        errorEl.classList.add('hidden');
+        Utils.setButtonLoading(saveBtn, true);
+
+        const data = {
+            title: document.getElementById('title').value.trim(),
+            description: document.getElementById('description').value.trim() || null,
+            status: document.getElementById('status').value,
+            priority: document.getElementById('priority').value,
+            dueDate: document.getElementById('dueDate').value || null
+        };
+
+        try {
+            await Api.todos.update(document.getElementById('todoId').value, data);
+            Toast.success('Updated');
+            Modal.close('todoModal');
+            await loadData();
+        } catch (error) {
+            errorEl.textContent = error.message || 'Failed to save';
+            errorEl.classList.remove('hidden');
+        } finally {
+            Utils.setButtonLoading(saveBtn, false);
+        }
+    }
+
+    async function handleDelete() {
+        if (!currentTodo) return;
+        const btn = document.getElementById('deleteConfirmBtn');
+        Utils.setButtonLoading(btn, true);
+
+        try {
+            await Api.todos.delete(currentTodo.id);
+            Toast.success('Deleted');
+            Modal.close('deleteModal');
+            Modal.close('todoModal');
+            await loadData();
+        } catch (error) {
+            Toast.error('Failed to delete');
+        } finally {
+            Utils.setButtonLoading(btn, false);
+        }
+    }
+</script>
+</body>
+</html>
+
