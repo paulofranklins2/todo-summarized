@@ -2,7 +2,7 @@
 
 A modern, full-stack Todo application with AI-powered insights. Built with Spring Boot and a clean, responsive UI.
 
-**Live Demo:** [https://todo-insight.duckdns.org](https://todo-insight.duckdns.org)
+**Live Demo:** [https://todo-insight.duckdns.org](https://todo-insight.duckdns.org) | **Design Doc:** [docs/DESIGN.md](docs/DESIGN.md)
 
 ---
 
@@ -25,8 +25,7 @@ A modern, full-stack Todo application with AI-powered insights. Built with Sprin
 - **Stats Overview** – View completion rates and breakdowns by status/priority
 
 ### Security
-- **User Authentication** – Secure registration and login
-- **Session-Based Auth** – Secure session management for web
+- **JWT Authentication** – Stateless API authentication
 - **User Isolation** – Each user only sees their own todos
 - **Rate Limiting** – Protection against API abuse
 
@@ -38,9 +37,10 @@ A modern, full-stack Todo application with AI-powered insights. Built with Sprin
 |-------|------------|
 | **Backend** | Java 21, Spring Boot 4.0.1 |
 | **Database** | PostgreSQL with Spring Data JPA |
-| **Security** | Spring Security (session + HTTP Basic) |
+| **Security** | Spring Security + JWT |
 | **Frontend** | Thymeleaf, Vanilla JS (ES6+), Custom CSS |
 | **AI** | OpenAI GPT / Google Gemini |
+| **Caching** | Caffeine (in-memory) |
 | **API Docs** | Springdoc OpenAPI / Swagger UI |
 | **Testing** | JUnit 5, Mockito (100+ tests) |
 
@@ -91,6 +91,7 @@ Responsive design for seamless mobile experience.
 ![Mobile 8](docs/images/mobile-8.png)
 
 </details>
+
 ---
 
 ## 📚 API Documentation
@@ -101,36 +102,13 @@ Interactive API documentation available at:
 
 ---
 
-## Project Structure
-
-```
-src/main/java/org/duckdns/todosummarized/
-├── config/          # Security, OpenAPI, cache, rate limit config
-├── controller/      # REST controllers (Auth, Todo, Summary)
-├── domains/
-│   ├── entity/      # JPA entities (Todo, User, AiInsight)
-│   └── enums/       # Domain enums (TaskStatus, TaskPriority, Role)
-├── dto/             # Request/Response DTOs and mappers
-├── exception/       # Global exception handling
-├── ratelimit/       # Rate limiting aspect and service
-├── repository/      # Spring Data JPA repositories
-└── service/         # Business logic and AI integration
-src/main/resources/
-├── static/          # CSS, JS, images
-└── templates/       # Thymeleaf templates
-```
-
----
-
 ## Development Progress
 
 See [TODO.md](TODO.md) for detailed progress tracking.
 
 ---
 
-
 ## License
 
 This project is for educational and portfolio purposes.
 
----
