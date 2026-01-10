@@ -38,6 +38,9 @@ class UserServiceTest {
     private UserRepository userRepository;
 
     @Mock
+    private UserCacheService userCacheService;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     private UserService userService;
@@ -49,7 +52,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, passwordEncoder);
+        userService = new UserService(userRepository, userCacheService, passwordEncoder);
     }
 
     private User createTestUser() {
@@ -279,7 +282,7 @@ class UserServiceTest {
         void shouldReturnUserProfileWhenUserExists() {
             // Given
             User user = createTestUser();
-            when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
+            when(userCacheService.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
 
             // When
             UserResponseDTO result = userService.getUserProfile(TEST_EMAIL);
@@ -291,21 +294,21 @@ class UserServiceTest {
             assertThat(result.getRole()).isEqualTo(Role.ROLE_USER.name());
             assertThat(result.isEnabled()).isTrue();
 
-            verify(userRepository).findByEmail(TEST_EMAIL);
+            verify(userCacheService).findByEmail(TEST_EMAIL);
         }
 
         @Test
         @DisplayName("should throw IllegalArgumentException when user not found")
         void shouldThrowExceptionWhenUserNotFound() {
             // Given
-            when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
+            when(userCacheService.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
 
             // When/Then
             assertThatThrownBy(() -> userService.getUserProfile(TEST_EMAIL))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("User not found");
 
-            verify(userRepository).findByEmail(TEST_EMAIL);
+            verify(userCacheService).findByEmail(TEST_EMAIL);
         }
 
         @Test
@@ -314,13 +317,13 @@ class UserServiceTest {
             // Given
             String upperCaseEmail = "TEST@EXAMPLE.COM";
             User user = createTestUser();
-            when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
+            when(userCacheService.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
 
             // When
             userService.getUserProfile(upperCaseEmail);
 
             // Then
-            verify(userRepository).findByEmail(TEST_EMAIL);
+            verify(userCacheService).findByEmail(TEST_EMAIL);
         }
 
         @Test
@@ -329,13 +332,13 @@ class UserServiceTest {
             // Given
             String emailWithSpaces = "  test@example.com  ";
             User user = createTestUser();
-            when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
+            when(userCacheService.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
 
             // When
             userService.getUserProfile(emailWithSpaces);
 
             // Then
-            verify(userRepository).findByEmail(TEST_EMAIL);
+            verify(userCacheService).findByEmail(TEST_EMAIL);
         }
 
         @ParameterizedTest
@@ -356,13 +359,13 @@ class UserServiceTest {
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .build();
-            when(userRepository.findByEmail(expectedEmail)).thenReturn(Optional.of(user));
+            when(userCacheService.findByEmail(expectedEmail)).thenReturn(Optional.of(user));
 
             // When
             userService.getUserProfile(inputEmail);
 
             // Then
-            verify(userRepository).findByEmail(expectedEmail);
+            verify(userCacheService).findByEmail(expectedEmail);
         }
 
         @Test
@@ -380,7 +383,7 @@ class UserServiceTest {
                     .createdAt(createdAt)
                     .updatedAt(updatedAt)
                     .build();
-            when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
+            when(userCacheService.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
 
             // When
             UserResponseDTO result = userService.getUserProfile(TEST_EMAIL);
@@ -403,7 +406,7 @@ class UserServiceTest {
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .build();
-            when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(disabledUser));
+            when(userCacheService.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(disabledUser));
 
             // When
             UserResponseDTO result = userService.getUserProfile(TEST_EMAIL);

@@ -21,14 +21,11 @@ import java.util.Locale;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserCacheService userCacheService;
     private final PasswordEncoder passwordEncoder;
 
     /**
      * Register a new user.
-     *
-     * @param userRegistrationDTO the registration details
-     * @return the created user response
-     * @throws UserAlreadyExistsException if email is already registered
      */
     @Transactional
     public UserResponseDTO registerUser(UserRegistrationDTO userRegistrationDTO) {
@@ -39,18 +36,19 @@ public class UserService {
         }
 
         User user = toNewUser(email, userRegistrationDTO.getPassword());
-        return UserResponseDTO.fromEntity(userRepository.save(user));
+        User savedUser = userRepository.save(user);
+
+        userCacheService.put(savedUser);
+
+        return UserResponseDTO.fromEntity(savedUser);
     }
 
     /**
      * Get the current authenticated user's profile.
-     *
-     * @param email the user's email
-     * @return the user response DTO
      */
     @Transactional(readOnly = true)
     public UserResponseDTO getUserProfile(String email) {
-        User user = userRepository.findByEmail(normalizeEmail(email))
+        User user = userCacheService.findByEmail(normalizeEmail(email))
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return UserResponseDTO.fromEntity(user);
     }

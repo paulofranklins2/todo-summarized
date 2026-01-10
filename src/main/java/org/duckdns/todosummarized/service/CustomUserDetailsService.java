@@ -1,16 +1,15 @@
 package org.duckdns.todosummarized.service;
 
 import lombok.RequiredArgsConstructor;
-import org.duckdns.todosummarized.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Spring Security adapter responsible for loading users by email.
  * In this application, email is used as the authentication username.
+ * Uses cached user lookup for O(1) access time on repeated requests.
  */
 @Service
 @RequiredArgsConstructor
@@ -18,12 +17,11 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private static final String USER_NOT_FOUND = "User not found with email: ";
 
-    private final UserRepository userRepository;
+    private final UserCacheService userCacheService;
 
     @Override
-    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) {
-        return userRepository.findByEmail(email)
+        return userCacheService.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND + email));
     }
 }
