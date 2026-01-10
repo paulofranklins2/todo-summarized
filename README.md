@@ -1,40 +1,90 @@
-# AI Daily Summary Todo API
+# Todo Summarized
 
-A backend-first Todo app that keeps the scope small while still showing real engineering fundamentals. It stores daily
-todos, exposes a clean REST API, and generates an end-of-day summary using deterministic metrics plus an optional
-AI-generated narrative.
+A modern, full-stack Todo application with AI-powered insights. Built with Spring Boot and a clean, responsive UI.
 
----
-
-## Project Status
-
-| Category | Progress |
-|----------|----------|
-| Core Functionality (P0) | 85% Complete |
-| Enhanced Features (P1) | 60% Complete |
-| Future Enhancements (P2) | 30% Complete |
-
-**Key Milestones Completed:**
-- Full CRUD REST API with validation and error handling
-- User authentication (registration, login, session-based + HTTP Basic)
-- Daily summary with deterministic metrics
-- Comprehensive unit test coverage (100+ tests)
-- Swagger/OpenAPI documentation
-
-See [TODO.md](TODO.md) for detailed progress tracking.
+**Live Demo:** [https://todo-summarized.duckdns.org](https://todo-summarized.duckdns.org)
 
 ---
 
-## Tech Stack
+## Features
 
-- **Java 21** with **Spring Boot 4.0.1**
-- **Spring Data JPA** with PostgreSQL
-- **Spring Security** (session-based auth + HTTP Basic for API)
-- **Thymeleaf** (dependency added for future frontend)
-- **Bean Validation** (Jakarta Validation)
-- **Lombok** for boilerplate reduction
-- **JUnit 5 + Mockito** for testing
-- **Springdoc OpenAPI** for Swagger UI and API documentation
+### Core Functionality
+- **Todo Management** – Create, read, update, delete todos with title, description, status, priority, and due date
+- **Smart Filtering** – Filter by status (Not Started, In Progress, Completed, Cancelled) and priority (Low, Medium, High, Critical)
+- **Pagination** – Efficiently browse large todo lists
+
+### AI-Powered Insights
+- **Daily Summary** – Get AI-generated insights about your productivity
+- **Multi-Provider Support** – Works with OpenAI GPT and Google Gemini
+- **Graceful Fallback** – Shows metrics-only summary if AI is unavailable
+
+### User Experience
+- **Modern Dashboard** – Clean, compact todo list with quick-add functionality
+- **Responsive Design** – Works seamlessly on desktop, tablet, and mobile
+- **Real-time Feedback** – Toast notifications, loading states, and smooth animations
+- **Stats Overview** – View completion rates and breakdowns by status/priority
+
+### Security
+- **User Authentication** – Secure registration and login
+- **Session-Based Auth** – Secure session management for web
+- **User Isolation** – Each user only sees their own todos
+- **Rate Limiting** – Protection against API abuse
+
+---
+
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Backend** | Java 21, Spring Boot 4.0.1 |
+| **Database** | PostgreSQL with Spring Data JPA |
+| **Security** | Spring Security (session + HTTP Basic) |
+| **Frontend** | Thymeleaf, Vanilla JS (ES6+), Custom CSS |
+| **AI** | OpenAI GPT / Google Gemini |
+| **API Docs** | Springdoc OpenAPI / Swagger UI |
+| **Testing** | JUnit 5, Mockito (100+ tests) |
+
+---
+
+## 📸 Screenshots
+
+### Landing Page
+* Clean, modern landing page showcasing features with login/register modals.
+![Landing Page 1](docs/images/landing-page-1.png)
+![Landing Page 2](docs/images/landing-page-2.png)
+![Landing Page 3](docs/images/landing-page-3.png)
+
+### Dashboard
+* Compact todo list with integrated filters, quick-add, and action buttons.
+![Dashboard 1](docs/images/dashboard-1.png)
+![Dashboard 2](docs/images/dashboard-2.png)
+![Dashboard 3](docs/images/dashboard-3.png)
+![Dashboard 4](docs/images/dashboard-4.png)
+![Dashboard 5](docs/images/dashboard-5.png)
+![Dashboard 6](docs/images/dashboard-6.png)
+
+### AI Insights
+* AI-generated productivity insights with markdown formatting.
+
+![AI Insights 1](docs/images/ai-insights-1.png)
+![AI Insights 2](docs/images/ai-insights-2.png)
+
+### Mobile
+![Mobile 1](docs/images/mobile-1.png)
+![Mobile 2](docs/images/mobile-2.png)
+![Mobile 3](docs/images/mobile-3.png)
+![Mobile 4](docs/images/mobile-4.png)
+![Mobile 5](docs/images/mobile-5.png)
+![Mobile 6](docs/images/mobile-6.png)
+![Mobile 7](docs/images/mobile-7.png)
+![Mobile 8](docs/images/mobile-8.png)
+---
+
+## 📚 API Documentation
+
+Interactive API documentation available at:
+- **Local:** http://localhost:8080/swagger-ui.html
+- **Production:** https://todo-summarized.duckdns.org/swagger-ui.html
 
 ---
 
@@ -84,26 +134,39 @@ src/main/java/org/duckdns/todosummarized/
 │   └── projection/
 │       ├── StatusCountProjection.java
 │       └── PriorityCountProjection.java
-└── service/
-    ├── TodoService.java
-    ├── UserService.java
-    ├── SummaryService.java
-    └── CustomUserDetailsService.java
+├── service/
+│   ├── TodoService.java
+│   ├── UserService.java
+│   ├── SummaryService.java
+│   └── CustomUserDetailsService.java
+└── resources/
+    └── static/         # CSS, JS, images
 ```
 
 ---
 
-## API Documentation
+## Development Progress
 
-This project uses **Springdoc OpenAPI** for interactive API documentation.
-
-Once the application is running, access:
-- **Swagger UI (Local)**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
-- **Swagger UI (Production)**: [https://todo-summarized.duckdns.org/swagger-ui.html](https://todo-summarized.duckdns.org/swagger-ui.html)
-- **OpenAPI Spec**: `/v3/api-docs`
+See [TODO.md](TODO.md) for detailed progress tracking.
 
 ---
 
-## TODO
+## Tech Stack
 
-Track development progress in [TODO.md](TODO.md)
+- **Java 21** with **Spring Boot 4.0.1**
+- **Spring Data JPA** with PostgreSQL
+- **Spring Security** (session-based auth + HTTP Basic for API)
+- **Thymeleaf** (dependency added for future frontend)
+- **Bean Validation** (Jakarta Validation)
+- **Lombok** for boilerplate reduction
+- **JUnit 5 + Mockito** for testing
+- **Springdoc OpenAPI** for Swagger UI and API documentation
+
+---
+
+
+## License
+
+This project is for educational and portfolio purposes.
+
+---
