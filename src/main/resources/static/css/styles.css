@@ -477,22 +477,22 @@ textarea.form-control {
 }
 
 .badge-priority-critical {
-    background: rgba(220, 38, 38, 0.1);
-    color: #B91C1C;
+    background: var(--color-danger-light);
+    color: var(--color-danger);
 }
 
 .badge-priority-high {
-    background: rgba(217, 119, 6, 0.1);
-    color: #B45309;
+    background: var(--color-warning-light);
+    color: var(--color-warning);
 }
 
 .badge-priority-medium {
-    background: rgba(107, 114, 128, 0.1);
-    color: var(--color-text-secondary);
+    background: var(--color-info-light);
+    color: var(--color-info);
 }
 
 .badge-priority-low {
-    background: rgba(156, 163, 175, 0.08);
+    background: var(--color-surface-hover);
     color: var(--color-text-muted);
 }
 
