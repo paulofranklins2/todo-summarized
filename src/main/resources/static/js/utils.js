@@ -267,75 +267,9 @@ const Components = (() => {
         return `<span class="badge badge-priority-${priority.toLowerCase()}">${label}</span>`;
     };
 
-    /**
-     * Render empty state.
-     */
-    const emptyState = (icon, title, message, actionHtml = '') => {
-        return `
-            <div class="empty-state">
-                <div class="empty-state-icon">${icon}</div>
-                <h3 class="empty-state-title">${Utils.escapeHtml(title)}</h3>
-                <p class="empty-state-message">${Utils.escapeHtml(message)}</p>
-                ${actionHtml}
-            </div>
-        `;
-    };
-
-    /**
-     * Render loading skeleton rows for table.
-     */
-    const tableSkeletons = (rows, cols) => {
-        return Array(rows).fill(0).map(() => `
-            <tr>
-                ${Array(cols).fill(0).map(() => `
-                    <td><div class="skeleton skeleton-text" style="width: ${60 + Math.random() * 40}%"></div></td>
-                `).join('')}
-            </tr>
-        `).join('');
-    };
-
-    /**
-     * Render pagination controls.
-     */
-    const pagination = (pageData, onPageChange) => {
-        const { number, totalPages, totalElements, size, first, last } = pageData;
-        const start = number * size + 1;
-        const end = Math.min((number + 1) * size, totalElements);
-
-        let html = `
-            <div class="pagination">
-                <span class="pagination-info">
-                    Showing ${start}-${end} of ${totalElements}
-                </span>
-        `;
-
-        // Previous button
-        html += `<button class="page-btn" data-page="${number - 1}" ${first ? 'disabled' : ''}>←</button>`;
-
-        // Page numbers (show max 5)
-        const maxPages = 5;
-        let startPage = Math.max(0, number - Math.floor(maxPages / 2));
-        let endPage = Math.min(totalPages - 1, startPage + maxPages - 1);
-        startPage = Math.max(0, endPage - maxPages + 1);
-
-        for (let i = startPage; i <= endPage; i++) {
-            html += `<button class="page-btn ${i === number ? 'active' : ''}" data-page="${i}">${i + 1}</button>`;
-        }
-
-        // Next button
-        html += `<button class="page-btn" data-page="${number + 1}" ${last ? 'disabled' : ''}>→</button>`;
-
-        html += '</div>';
-
-        return html;
-    };
-
     return {
         statusBadge,
-        priorityBadge,
-        emptyState,
-        tableSkeletons,
-        pagination
+        priorityBadge
     };
 })();
 

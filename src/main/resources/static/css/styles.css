@@ -103,10 +103,6 @@ h3 {
     color: var(--color-text-muted);
 }
 
-.text-secondary {
-    color: var(--color-text-secondary);
-}
-
 .text-success {
     color: var(--color-success);
 }
@@ -501,246 +497,6 @@ textarea.form-control {
 }
 
 
-/* Quick Add Todo Bar */
-.add-todo-bar {
-    display: flex;
-    gap: var(--space-2);
-    margin-bottom: var(--space-4);
-}
-
-.add-todo-bar .form-control {
-    flex: 1;
-}
-
-.add-todo-bar .btn {
-    flex-shrink: 0;
-}
-
-
-/* Table */
-.table-container {
-    overflow-x: auto;
-    margin: 0 -1rem;
-    padding: 0 1rem;
-}
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: var(--text-sm);
-}
-
-.table th, .table td {
-    padding: var(--space-3);
-    text-align: left;
-    border-bottom: 1px solid var(--color-border);
-}
-
-.table th {
-    font-weight: 500;
-    color: var(--color-text-muted);
-    font-size: var(--text-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.table tbody tr:hover {
-    background: var(--color-surface-hover);
-}
-
-.table tbody tr.todo-completed {
-    opacity: 0.6;
-}
-
-.table-actions {
-    display: flex;
-    gap: var(--space-1);
-}
-
-/* Todo Checkbox */
-.todo-checkbox-cell {
-    width: 40px;
-}
-
-.todo-checkbox {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-.todo-checkbox.disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-.todo-checkbox input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-}
-
-.todo-checkbox .checkmark {
-    width: 22px;
-    height: 22px;
-    border: 2px solid var(--color-border);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-}
-
-.todo-checkbox:hover .checkmark {
-    border-color: var(--color-success);
-    background: var(--color-success-light);
-}
-
-.todo-checkbox input:checked + .checkmark {
-    background: var(--color-success);
-    border-color: var(--color-success);
-}
-
-.todo-checkbox input:checked + .checkmark::after {
-    content: '';
-    width: 6px;
-    height: 10px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-    margin-bottom: 2px;
-}
-
-.todo-title-done {
-    text-decoration: line-through;
-    color: var(--color-text-muted);
-}
-
-/* Due date indicators */
-.due-indicator {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-left: 6px;
-    vertical-align: middle;
-    flex-shrink: 0;
-}
-
-.due-indicator-overdue {
-    background: var(--color-danger);
-}
-
-.due-indicator-today {
-    background: var(--color-warning);
-}
-
-.due-indicator-upcoming {
-    background: var(--color-success);
-}
-
-/* Mobile Table - Compact View */
-@media (max-width: 640px) {
-    .table thead {
-        display: none;
-    }
-
-    .table tbody tr {
-        display: flex;
-        align-items: center;
-        padding: var(--space-3) var(--space-2);
-        gap: var(--space-2);
-        border-bottom: 1px solid var(--color-border);
-        margin: 0;
-        background: none;
-        border-radius: 0;
-    }
-
-    .table tbody tr:last-child {
-        border-bottom: none;
-    }
-
-    .table tbody td {
-        padding: 0;
-        border: none;
-    }
-
-    .table tbody td::before {
-        display: none;
-    }
-
-    /* Checkbox - fixed width */
-    .table tbody td.todo-checkbox-cell {
-        flex: 0 0 24px;
-    }
-
-    /* Task - takes remaining space */
-    .table tbody td[data-label="Task"] {
-        flex: 1;
-        min-width: 0;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-    }
-
-    .table tbody td[data-label="Task"] small,
-    .table tbody td[data-label="Task"] br {
-        display: none;
-    }
-
-    /* Priority badge - compact */
-    .table tbody td[data-label="Priority"] {
-        flex: 0 0 auto;
-    }
-
-    /* Hide due date on mobile to save space */
-    .table tbody td[data-label="Due"] {
-        display: none;
-    }
-
-    /* Smaller checkbox on mobile */
-    .todo-checkbox .checkmark {
-        width: 20px;
-        height: 20px;
-    }
-
-    /* Compact filters */
-    .filters-bar {
-        padding: var(--space-2);
-        gap: var(--space-2);
-        margin-bottom: var(--space-3);
-    }
-
-    .filter-group {
-        min-width: 100px;
-    }
-
-    .filter-group .form-control {
-        padding: var(--space-2);
-        font-size: var(--text-xs);
-    }
-
-    /* Compact add bar */
-    .add-todo-bar {
-        margin-bottom: var(--space-3);
-    }
-
-    .add-todo-bar .form-control {
-        padding: var(--space-2) var(--space-3);
-    }
-
-    /* Tighter card padding */
-    .card-body {
-        padding: 0;
-    }
-
-    .table-container {
-        margin: 0;
-        padding: 0;
-    }
-}
 
 /* Modal */
 .modal-overlay {
@@ -968,67 +724,7 @@ textarea.form-control {
     font-size: var(--text-sm);
 }
 
-.auth-footer {
-    margin-top: var(--space-4);
-    text-align: center;
-    font-size: var(--text-sm);
-    color: var(--color-text-muted);
-}
-
-/* Page Header */
-.page-header {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    margin-bottom: var(--space-6);
-}
-
-.page-header h1 {
-    font-size: var(--text-xl);
-}
-
-/* === Filters === */
-.filters-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    padding: var(--space-3);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    margin-bottom: var(--space-4);
-}
-
-.filter-group {
-    flex: 1;
-    min-width: 120px;
-}
-
-.filter-group label {
-    display: block;
-    font-size: var(--text-xs);
-    color: var(--color-text-muted);
-    margin-bottom: var(--space-1);
-}
-
-.filter-group .form-control {
-    padding: var(--space-2);
-    font-size: var(--text-sm);
-}
-
-/* === Pagination === */
-.pagination {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-1);
-    padding: var(--space-4) 0;
-}
-
-.pagination-info {
-    display: none;
-}
-
+/* Page Buttons */
 .page-btn {
     min-width: 36px;
     height: 36px;
@@ -1058,7 +754,7 @@ textarea.form-control {
     cursor: not-allowed;
 }
 
-/* === AI Summary === */
+/* AI Summary */
 .ai-summary-box {
     padding: var(--space-5);
     background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-surface) 100%);
@@ -1216,40 +912,7 @@ textarea.form-control {
     gap: var(--space-2);
 }
 
-.todo-row-clickable {
-    cursor: pointer;
-}
-
-.todo-row-clickable:hover {
-    background: var(--color-surface-hover);
-}
-
-
-/* === Metrics Grid === */
-.metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-2);
-}
-
-.metric-item {
-    padding: var(--space-3);
-    background: var(--color-surface-hover);
-    border-radius: var(--radius);
-    text-align: center;
-}
-
-.metric-value {
-    font-size: var(--text-xl);
-    font-weight: 700;
-}
-
-.metric-label {
-    font-size: var(--text-xs);
-    color: var(--color-text-muted);
-}
-
-/* === Utilities === */
+/* Utilities */
 .hidden {
     display: none !important;
 }
@@ -1286,126 +949,8 @@ textarea.form-control {
     margin-top: var(--space-4);
 }
 
-/* === Dashboard Header === */
-.dashboard-header {
-    display: flex;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-}
-
-.stats-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-}
-
-.stats-toggle-icon {
-    transition: transform var(--transition);
-}
-
-.stats-toggle.active .stats-toggle-icon {
-    transform: rotate(180deg);
-}
-
-/* === Stats Panel === */
-.stats-panel {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: var(--space-4);
-    margin-bottom: var(--space-4);
-    animation: slideDown 0.2s ease-out;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.stats-grid-compact {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-2);
-    margin-bottom: var(--space-4);
-    padding-bottom: var(--space-4);
-    border-bottom: 1px solid var(--color-border-light);
-}
-
-.stat-item {
-    text-align: center;
-    padding: var(--space-2);
-}
-
-.stat-item .stat-value {
-    display: block;
-    font-size: var(--text-xl);
-    font-weight: 700;
-    line-height: 1.2;
-}
-
-.stat-item .stat-label {
-    display: block;
-    font-size: var(--text-xs);
-    color: var(--color-text-muted);
-    margin-top: var(--space-1);
-}
-
-.stats-breakdown {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-4);
-}
-
-.breakdown-section h4 {
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    margin-bottom: var(--space-2);
-}
-
-.breakdown-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-}
-
-.breakdown-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--space-1) 0;
-    font-size: var(--text-sm);
-}
-
-/* Mobile adjustments for stats */
-@media (max-width: 640px) {
-    .stats-grid-compact {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .stats-breakdown {
-        grid-template-columns: 1fr;
-        gap: var(--space-3);
-    }
-}
-
-/* === Desktop Styles === */
+/* Desktop Styles */
 @media (min-width: 641px) {
-    .metrics-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-
-    .page-header {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-    }
 
     .modal {
         border-radius: var(--radius-lg);
@@ -1442,15 +987,6 @@ textarea.form-control {
         left: auto;
         right: var(--space-4);
         max-width: 360px;
-    }
-
-    .pagination-info {
-        display: block;
-        margin-right: auto;
-    }
-
-    .filters-bar {
-        padding: var(--space-4);
     }
 }
 
