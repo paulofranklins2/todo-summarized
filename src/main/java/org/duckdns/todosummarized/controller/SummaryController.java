@@ -98,6 +98,31 @@ public class SummaryController {
     }
 
     /**
+     * Get cached AI insight for the authenticated user.
+     */
+    @Operation(
+            summary = "Get cached AI insight",
+            description = "Returns the user's previously generated and cached AI insight. " +
+                    "Use this when opening the AI insight modal to show existing insight immediately. " +
+                    "Returns 204 No Content if no cached insight exists."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Cached insight found and returned",
+            content = @Content(schema = @Schema(implementation = AiSummaryDTO.class))
+    )
+    @ApiResponse(
+            responseCode = "204",
+            description = "No cached insight available"
+    )
+    @GetMapping("/ai/cached")
+    public ResponseEntity<AiSummaryDTO> getCachedAiInsight(@AuthenticationPrincipal User user) {
+        return aiSummaryService.getCachedInsight(user)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    /**
      * Get all available summary types with their descriptions.
      */
     @Operation(

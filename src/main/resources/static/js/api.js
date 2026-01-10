@@ -104,6 +104,7 @@ const Api = (() => {
     const summary = {
         daily: () => request('/summary/daily'),
         ai: (type) => request(`/summary/ai?type=${type}`),
+        aiCached: () => request('/summary/ai/cached'),
         types: () => request('/summary/types'),
         aiStatus: () => request('/summary/ai/status')
     };

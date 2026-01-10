@@ -62,11 +62,13 @@
                 checkAiStatus();
             };
 
-            const open = () => {
+            const open = async () => {
                 const modal = document.getElementById('aiInsightsModal');
                 if (modal) {
                     modal.classList.add('active');
                     document.body.style.overflow = 'hidden';
+                    // Try to load cached insight when modal opens
+                    await loadCachedInsight();
                 }
             };
 
@@ -76,6 +78,37 @@
                     modal.classList.remove('active');
                     document.body.style.overflow = '';
                 }
+            };
+
+            const loadCachedInsight = async () => {
+                try {
+                    const cached = await Api.summary.aiCached();
+                    if (cached) {
+                        displayInsight(cached);
+                        // Set the dropdown to match the cached type
+                        const typeSelect = document.getElementById('aiSummaryType');
+                        if (typeSelect && cached.summaryType) {
+                            typeSelect.value = cached.summaryType;
+                        }
+                    }
+                } catch (e) {
+                    // No cached insight or error - keep showing placeholder
+                    console.debug('No cached insight available');
+                }
+            };
+
+            const displayInsight = (s) => {
+                const container = document.getElementById('aiInsightsContainer');
+                if (!container) return;
+
+                container.innerHTML = `
+                    <div class="ai-summary-box">
+                        <div class="ai-summary-header">
+                            <span class="ai-summary-type">${Utils.escapeHtml(s.summaryTypeName || s.summaryType)}</span>
+                            <span class="badge ${s.aiGenerated ? 'badge-status-completed' : 'badge-status-not_started'}">${s.aiGenerated ? 'AI' : 'Metrics'}</span>
+                        </div>
+                        <div class="ai-summary-content">${Utils.formatMarkdown(s.summary || 'No summary available.')}</div>
+                    </div>`;
             };
 
             const loadSummaryTypes = async () => {
@@ -112,7 +145,6 @@
 
             const generate = async () => {
                 const btn = document.getElementById('generateAiSummaryBtn');
-                const container = document.getElementById('aiInsightsContainer');
                 const typeSelect = document.getElementById('aiSummaryType');
                 const type = typeSelect?.value;
 
@@ -122,14 +154,7 @@
 
                 try {
                     const s = await Api.summary.ai(type);
-                    container.innerHTML = `
-                        <div class="ai-summary-box">
-                            <div class="ai-summary-header">
-                                <span class="ai-summary-type">${Utils.escapeHtml(s.summaryTypeName || type)}</span>
-                                <span class="badge ${s.aiGenerated ? 'badge-status-completed' : 'badge-status-not_started'}">${s.aiGenerated ? 'AI' : 'Metrics'}</span>
-                            </div>
-                            <div class="ai-summary-content">${Utils.formatMarkdown(s.summary || 'No summary available.')}</div>
-                        </div>`;
+                    displayInsight(s);
                 } catch (e) {
                     Toast.error(e.message || 'Failed to generate');
                 } finally {
