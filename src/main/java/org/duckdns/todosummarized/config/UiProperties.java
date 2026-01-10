@@ -18,7 +18,7 @@ public class UiProperties {
     /**
      * Application name displayed in UI.
      */
-    private String appName = "Todo Summarized";
+    private String appName = "Todo Insight";
 
     /**
      * Application version.

@@ -10,7 +10,7 @@ jwt:
   secret-key: YourSuperSecretKeyMustBeAtLeast256BitsLongForHS256Algorithm!
   access-token-expiration: 900000    # 15 minutes in milliseconds
   refresh-token-expiration: 604800000 # 7 days in milliseconds
-  issuer: todo-summarized
+  issuer: todo-insight
 
 # AI Summary Configuration
 # Options AUTO | OPENAI | GEMINI

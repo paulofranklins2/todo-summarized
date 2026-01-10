@@ -1,6 +1,6 @@
 spring:
   application:
-    name: todo-summarized
+    name: todo-insight
 
   # Active profile
   profiles:
@@ -32,7 +32,7 @@ spring:
 # Application UI Configuration
 app:
   ui:
-    app-name: Todo Summarized
+    app-name: Todo Insight
     version: 1.0.0
     api-base: /api
     date-format: MMM dd, yyyy

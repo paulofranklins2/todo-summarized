@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.duckdns</groupId>
-    <artifactId>todo-summarized</artifactId>
+    <artifactId>todo-insight</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>todo-summarized</name>
-    <description>todo-summarized</description>
+    <name>todo-insight</name>
+    <description>todo-insight</description>
     <url/>
     <licenses>
         <license/>

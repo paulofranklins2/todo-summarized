@@ -17,15 +17,15 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 
     private static final String BEARER_AUTH = "bearerAuth";
-    private static final String API_TITLE = "Todo Summarized API";
+    private static final String API_TITLE = "Todo Insight API";
     private static final String API_VERSION = "1.0.0";
     private static final String API_DESCRIPTION =
             "A backend-first Todo API that stores daily todos, exposes a clean REST API, " +
                     "and generates end-of-day summaries using deterministic metrics plus optional AI narratives. " +
                     "Authentication is handled via JWT tokens.";
 
-    private static final String CONTACT_NAME = "Todo Summarized";
-    private static final String CONTACT_URL = "https://todo-summarized.duckdns.org";
+    private static final String CONTACT_NAME = "Todo Insight";
+    private static final String CONTACT_URL = "https://todo-insight.duckdns.org";
 
     private static final String LICENSE_NAME = "MIT License";
     private static final String LICENSE_URL = "https://opensource.org/licenses/MIT";

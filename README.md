@@ -1,8 +1,8 @@
-# Todo Summarized
+# Todo Insight
 
 A modern, full-stack Todo application with AI-powered insights. Built with Spring Boot and a clean, responsive UI.
 
-**Live Demo:** [https://todo-summarized.duckdns.org](https://todo-summarized.duckdns.org)
+**Live Demo:** [https://todo-insight.duckdns.org](https://todo-insight.duckdns.org)
 
 ---
 
@@ -85,7 +85,7 @@ A modern, full-stack Todo application with AI-powered insights. Built with Sprin
 
 Interactive API documentation available at:
 - **Local:** http://localhost:8080/swagger-ui.html
-- **Production:** https://todo-summarized.duckdns.org/swagger-ui.html
+- **Production:** https://todo-insight.duckdns.org/swagger-ui.html
 
 ---
 
