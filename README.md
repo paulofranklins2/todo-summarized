@@ -65,11 +65,11 @@ A modern, full-stack Todo application with AI-powered insights. Built with Sprin
 
 ### AI Insights
 * AI-generated productivity insights with markdown formatting.
-
 ![AI Insights 1](docs/images/ai-insights-1.png)
 ![AI Insights 2](docs/images/ai-insights-2.png)
 
 ### Mobile
+* Responsive design for seamless mobile experience.
 ![Mobile 1](docs/images/mobile-1.png)
 ![Mobile 2](docs/images/mobile-2.png)
 ![Mobile 3](docs/images/mobile-3.png)
