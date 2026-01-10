@@ -36,7 +36,7 @@ class GeminiSummaryAdapterTest {
     void setUp() {
         // Need to provide default timeout for HttpClient initialization
         when(geminiProperties.getTimeoutSeconds()).thenReturn(30);
-        when(geminiProperties.getModel()).thenReturn("gemini-1.5-flash");
+        when(geminiProperties.getModel()).thenReturn("gemini-2.5-flash-lite");
         when(geminiProperties.isEnabled()).thenReturn(true);
 
         geminiSummaryAdapter = new GeminiSummaryAdapter(geminiProperties, objectMapper, messageBuilder);
@@ -93,9 +93,9 @@ class GeminiSummaryAdapterTest {
         @Test
         @DisplayName("should return configured model")
         void shouldReturnConfiguredModel() {
-            when(geminiProperties.getModel()).thenReturn("gemini-1.5-flash");
+            when(geminiProperties.getModel()).thenReturn("gemini-2.5-flash-lite");
 
-            assertEquals("gemini-1.5-flash", geminiSummaryAdapter.getModel());
+            assertEquals("gemini-2.5-flash-lite", geminiSummaryAdapter.getModel());
         }
 
         @Test

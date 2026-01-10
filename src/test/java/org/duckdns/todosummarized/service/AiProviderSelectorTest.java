@@ -1,5 +1,6 @@
 package org.duckdns.todosummarized.service;
 
+import org.duckdns.todosummarized.config.AiProperties;
 import org.duckdns.todosummarized.domains.enums.AiProvider;
 import org.duckdns.todosummarized.domains.enums.SummaryType;
 import org.duckdns.todosummarized.dto.DailySummaryDTO;
@@ -26,6 +27,9 @@ class AiProviderSelectorTest {
     private OpenAiSummaryAdapter openAiAdapter;
 
     @Mock
+    private AiProperties aiProperties;
+
+    @Mock
     private GeminiSummaryAdapter geminiAdapter;
 
     @InjectMocks
@@ -35,6 +39,10 @@ class AiProviderSelectorTest {
 
     @BeforeEach
     void setUp() {
+        // Default: AI is globally enabled with AUTO provider
+        lenient().when(aiProperties.isEnabled()).thenReturn(true);
+        lenient().when(aiProperties.getProvider()).thenReturn(AiProvider.AUTO);
+
         sampleMetrics = DailySummaryDTO.builder()
                 .date(LocalDate.of(2026, 1, 9))
                 .totalTodos(25)
@@ -61,14 +69,14 @@ class AiProviderSelectorTest {
             when(openAiAdapter.isEnabled()).thenReturn(true);
             when(openAiAdapter.generateSummary(sampleMetrics, SummaryType.DEVELOPER))
                     .thenReturn(Optional.of("OpenAI summary"));
-            when(openAiAdapter.getModel()).thenReturn("gpt-4o-mini");
+            when(openAiAdapter.getModel()).thenReturn("gpt-5-nano");
 
             AiProviderSelector.AiGenerationResult result =
                     providerSelector.generateSummary(sampleMetrics, SummaryType.DEVELOPER, AiProvider.OPENAI);
 
             assertTrue(result.success());
             assertEquals("OpenAI summary", result.summary());
-            assertEquals("gpt-4o-mini", result.model());
+            assertEquals("gpt-5-nano", result.model());
             assertEquals(AiProvider.OPENAI, result.provider());
         }
 
@@ -96,14 +104,14 @@ class AiProviderSelectorTest {
             when(geminiAdapter.isEnabled()).thenReturn(true);
             when(geminiAdapter.generateSummary(sampleMetrics, SummaryType.DEVELOPER))
                     .thenReturn(Optional.of("Gemini summary"));
-            when(geminiAdapter.getModel()).thenReturn("gemini-1.5-flash");
+            when(geminiAdapter.getModel()).thenReturn("gemini-2.5-flash-lite");
 
             AiProviderSelector.AiGenerationResult result =
                     providerSelector.generateSummary(sampleMetrics, SummaryType.DEVELOPER, AiProvider.GEMINI);
 
             assertTrue(result.success());
             assertEquals("Gemini summary", result.summary());
-            assertEquals("gemini-1.5-flash", result.model());
+            assertEquals("gemini-2.5-flash-lite", result.model());
             assertEquals(AiProvider.GEMINI, result.provider());
         }
 
@@ -131,7 +139,7 @@ class AiProviderSelectorTest {
             when(openAiAdapter.isEnabled()).thenReturn(true);
             when(openAiAdapter.generateSummary(sampleMetrics, SummaryType.DEVELOPER))
                     .thenReturn(Optional.of("OpenAI summary"));
-            when(openAiAdapter.getModel()).thenReturn("gpt-4o-mini");
+            when(openAiAdapter.getModel()).thenReturn("gpt-5-nano");
 
             AiProviderSelector.AiGenerationResult result =
                     providerSelector.generateSummary(sampleMetrics, SummaryType.DEVELOPER, AiProvider.AUTO);
@@ -151,7 +159,7 @@ class AiProviderSelectorTest {
             when(geminiAdapter.isEnabled()).thenReturn(true);
             when(geminiAdapter.generateSummary(sampleMetrics, SummaryType.DEVELOPER))
                     .thenReturn(Optional.of("Gemini summary"));
-            when(geminiAdapter.getModel()).thenReturn("gemini-1.5-flash");
+            when(geminiAdapter.getModel()).thenReturn("gemini-2.5-flash-lite");
 
             AiProviderSelector.AiGenerationResult result =
                     providerSelector.generateSummary(sampleMetrics, SummaryType.DEVELOPER, AiProvider.AUTO);
@@ -168,7 +176,7 @@ class AiProviderSelectorTest {
             when(geminiAdapter.isEnabled()).thenReturn(true);
             when(geminiAdapter.generateSummary(sampleMetrics, SummaryType.DEVELOPER))
                     .thenReturn(Optional.of("Gemini summary"));
-            when(geminiAdapter.getModel()).thenReturn("gemini-1.5-flash");
+            when(geminiAdapter.getModel()).thenReturn("gemini-2.5-flash-lite");
 
             AiProviderSelector.AiGenerationResult result =
                     providerSelector.generateSummary(sampleMetrics, SummaryType.DEVELOPER, AiProvider.AUTO);
@@ -187,8 +195,6 @@ class AiProviderSelectorTest {
             when(geminiAdapter.isEnabled()).thenReturn(true);
             when(geminiAdapter.generateSummary(sampleMetrics, SummaryType.DEVELOPER))
                     .thenReturn(Optional.empty());
-            when(openAiAdapter.getUnavailableReason()).thenReturn("OpenAI error");
-            when(geminiAdapter.getUnavailableReason()).thenReturn("Gemini error");
 
             AiProviderSelector.AiGenerationResult result =
                     providerSelector.generateSummary(sampleMetrics, SummaryType.DEVELOPER, AiProvider.AUTO);
@@ -207,7 +213,7 @@ class AiProviderSelectorTest {
                     providerSelector.generateSummary(sampleMetrics, SummaryType.DEVELOPER, AiProvider.AUTO);
 
             assertFalse(result.success());
-            assertEquals("All AI providers are disabled", result.failureReason());
+            assertEquals("All AI providers are disabled. Enable OpenAI or Gemini in configuration.", result.failureReason());
         }
     }
 
@@ -219,7 +225,6 @@ class AiProviderSelectorTest {
         @DisplayName("should return true when OpenAI is enabled")
         void shouldReturnTrueWhenOpenAiEnabled() {
             when(openAiAdapter.isEnabled()).thenReturn(true);
-            when(geminiAdapter.isEnabled()).thenReturn(false);
 
             assertTrue(providerSelector.isAnyProviderAvailable());
         }
@@ -237,7 +242,6 @@ class AiProviderSelectorTest {
         @DisplayName("should return true when both are enabled")
         void shouldReturnTrueWhenBothEnabled() {
             when(openAiAdapter.isEnabled()).thenReturn(true);
-            when(geminiAdapter.isEnabled()).thenReturn(true);
 
             assertTrue(providerSelector.isAnyProviderAvailable());
         }
@@ -290,19 +294,113 @@ class AiProviderSelectorTest {
         @DisplayName("should return info for all providers")
         void shouldReturnInfoForAllProviders() {
             when(openAiAdapter.isEnabled()).thenReturn(true);
-            when(openAiAdapter.getModel()).thenReturn("gpt-4o-mini");
+            when(openAiAdapter.getModel()).thenReturn("gpt-5-nano");
             when(geminiAdapter.isEnabled()).thenReturn(false);
-            when(geminiAdapter.getModel()).thenReturn("gemini-1.5-flash");
+            when(geminiAdapter.getModel()).thenReturn("gemini-2.5-flash-lite");
 
             AiProviderSelector.ProviderInfo[] info = providerSelector.getProviderInfo();
 
             assertEquals(2, info.length);
             assertEquals(AiProvider.OPENAI, info[0].provider());
             assertTrue(info[0].available());
-            assertEquals("gpt-4o-mini", info[0].model());
+            assertEquals("gpt-5-nano", info[0].model());
             assertEquals(AiProvider.GEMINI, info[1].provider());
             assertFalse(info[1].available());
-            assertEquals("gemini-1.5-flash", info[1].model());
+            assertEquals("gemini-2.5-flash-lite", info[1].model());
+        }
+
+        @Test
+        @DisplayName("should show providers as unavailable when AI is globally disabled")
+        void shouldShowProvidersUnavailableWhenGloballyDisabled() {
+            when(aiProperties.isEnabled()).thenReturn(false);
+            when(openAiAdapter.getModel()).thenReturn("gpt-5-nano");
+            when(geminiAdapter.getModel()).thenReturn("gemini-2.5-flash-lite");
+
+            AiProviderSelector.ProviderInfo[] info = providerSelector.getProviderInfo();
+
+            assertFalse(info[0].available());
+            assertFalse(info[1].available());
+        }
+    }
+
+    @Nested
+    @DisplayName("Global AI disabled")
+    class GlobalAiDisabledTests {
+
+        @Test
+        @DisplayName("should return failure when AI is globally disabled")
+        void shouldReturnFailureWhenGloballyDisabled() {
+            when(aiProperties.isEnabled()).thenReturn(false);
+
+            AiProviderSelector.AiGenerationResult result =
+                    providerSelector.generateSummary(sampleMetrics, SummaryType.DEVELOPER, AiProvider.AUTO);
+
+            assertFalse(result.success());
+            assertEquals("AI-powered summary feature is disabled", result.failureReason());
+            verify(openAiAdapter, never()).generateSummary(any(), any());
+            verify(geminiAdapter, never()).generateSummary(any(), any());
+        }
+
+        @Test
+        @DisplayName("should return no provider available when AI is globally disabled")
+        void shouldReturnNoProviderAvailableWhenGloballyDisabled() {
+            when(aiProperties.isEnabled()).thenReturn(false);
+
+            assertFalse(providerSelector.isAnyProviderAvailable());
+            assertFalse(providerSelector.isProviderAvailable(AiProvider.OPENAI));
+            assertFalse(providerSelector.isProviderAvailable(AiProvider.GEMINI));
+            assertFalse(providerSelector.isProviderAvailable(AiProvider.AUTO));
+        }
+
+        @Test
+        @DisplayName("should return correct unavailable reason when AI is globally disabled")
+        void shouldReturnCorrectUnavailableReasonWhenGloballyDisabled() {
+            when(aiProperties.isEnabled()).thenReturn(false);
+
+            String reason = providerSelector.getAggregatedUnavailableReason();
+
+            assertEquals("AI-powered summary feature is disabled", reason);
+        }
+    }
+
+    @Nested
+    @DisplayName("Global provider preference")
+    class GlobalProviderPreferenceTests {
+
+        @Test
+        @DisplayName("should use global provider when set to OPENAI and request is AUTO")
+        void shouldUseGlobalProviderOpenAi() {
+            when(aiProperties.getProvider()).thenReturn(AiProvider.OPENAI);
+            when(openAiAdapter.isEnabled()).thenReturn(true);
+            when(openAiAdapter.generateSummary(sampleMetrics, SummaryType.DEVELOPER))
+                    .thenReturn(Optional.of("OpenAI summary"));
+            when(openAiAdapter.getModel()).thenReturn("gpt-5-nano");
+
+            AiProviderSelector.AiGenerationResult result =
+                    providerSelector.generateSummary(sampleMetrics, SummaryType.DEVELOPER, AiProvider.AUTO);
+
+            assertTrue(result.success());
+            assertEquals(AiProvider.OPENAI, result.provider());
+            verify(geminiAdapter, never()).isEnabled();
+            verify(geminiAdapter, never()).generateSummary(any(), any());
+        }
+
+        @Test
+        @DisplayName("should use global provider when set to GEMINI and request is AUTO")
+        void shouldUseGlobalProviderGemini() {
+            when(aiProperties.getProvider()).thenReturn(AiProvider.GEMINI);
+            when(geminiAdapter.isEnabled()).thenReturn(true);
+            when(geminiAdapter.generateSummary(sampleMetrics, SummaryType.DEVELOPER))
+                    .thenReturn(Optional.of("Gemini summary"));
+            when(geminiAdapter.getModel()).thenReturn("gemini-2.5-flash-lite");
+
+            AiProviderSelector.AiGenerationResult result =
+                    providerSelector.generateSummary(sampleMetrics, SummaryType.DEVELOPER, AiProvider.AUTO);
+
+            assertTrue(result.success());
+            assertEquals(AiProvider.GEMINI, result.provider());
+            verify(openAiAdapter, never()).isEnabled();
+            verify(openAiAdapter, never()).generateSummary(any(), any());
         }
     }
 }

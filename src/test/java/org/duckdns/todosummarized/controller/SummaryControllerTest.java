@@ -148,7 +148,7 @@ class SummaryControllerTest {
                     LocalDate.of(2026, 1, 9),
                     SummaryType.DEVELOPER,
                     "AI generated summary",
-                    "gpt-4o-mini",
+                    "gpt-5-nano",
                     metrics
             );
 
@@ -213,8 +213,8 @@ class SummaryControllerTest {
         void getAiStatus_returnsAvailableTrue() {
             when(aiSummaryService.isAiAvailable()).thenReturn(true);
             when(aiSummaryService.getProviderInfo()).thenReturn(new AiProviderSelector.ProviderInfo[]{
-                    new AiProviderSelector.ProviderInfo(AiProvider.OPENAI, true, "gpt-4o-mini"),
-                    new AiProviderSelector.ProviderInfo(AiProvider.GEMINI, false, "gemini-1.5-flash")
+                    new AiProviderSelector.ProviderInfo(AiProvider.OPENAI, true, "gpt-5-nano"),
+                    new AiProviderSelector.ProviderInfo(AiProvider.GEMINI, false, "gemini-2.5-flash-lite")
             });
 
             ResponseEntity<Map<String, Object>> response = summaryController.getAiStatus();
@@ -228,8 +228,8 @@ class SummaryControllerTest {
         void getAiStatus_returnsAvailableFalse() {
             when(aiSummaryService.isAiAvailable()).thenReturn(false);
             when(aiSummaryService.getProviderInfo()).thenReturn(new AiProviderSelector.ProviderInfo[]{
-                    new AiProviderSelector.ProviderInfo(AiProvider.OPENAI, false, "gpt-4o-mini"),
-                    new AiProviderSelector.ProviderInfo(AiProvider.GEMINI, false, "gemini-1.5-flash")
+                    new AiProviderSelector.ProviderInfo(AiProvider.OPENAI, false, "gpt-5-nano"),
+                    new AiProviderSelector.ProviderInfo(AiProvider.GEMINI, false, "gemini-2.5-flash-lite")
             });
 
             ResponseEntity<Map<String, Object>> response = summaryController.getAiStatus();

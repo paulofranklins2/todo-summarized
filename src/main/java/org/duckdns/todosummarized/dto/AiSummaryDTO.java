@@ -31,7 +31,7 @@ public record AiSummaryDTO(
         @Schema(description = "Fallback reason if AI was not used", example = "AI is disabled")
         String fallbackReason,
 
-        @Schema(description = "OpenAI model used (if AI generated)", example = "gpt-4o-mini")
+        @Schema(description = "OpenAI model used (if AI generated)", example = "gpt-5-nano")
         String model,
 
         @Schema(description = "Metrics-only summary as fallback")

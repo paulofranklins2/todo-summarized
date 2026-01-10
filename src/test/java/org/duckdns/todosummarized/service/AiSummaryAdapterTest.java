@@ -36,7 +36,7 @@ class AiSummaryAdapterTest {
     void setUp() {
         // Need to provide default timeout for HttpClient initialization
         when(openAiProperties.getTimeoutSeconds()).thenReturn(30);
-        when(openAiProperties.getModel()).thenReturn("gpt-4o-mini");
+        when(openAiProperties.getModel()).thenReturn("gpt-5-nano");
         when(openAiProperties.isEnabled()).thenReturn(true);
 
         aiSummaryAdapter = new OpenAiSummaryAdapter(openAiProperties, objectMapper, messageBuilder);
@@ -93,9 +93,9 @@ class AiSummaryAdapterTest {
         @Test
         @DisplayName("should return configured model")
         void shouldReturnConfiguredModel() {
-            when(openAiProperties.getModel()).thenReturn("gpt-4o-mini");
+            when(openAiProperties.getModel()).thenReturn("gpt-5-nano");
 
-            assertEquals("gpt-4o-mini", aiSummaryAdapter.getModel());
+            assertEquals("gpt-5-nano", aiSummaryAdapter.getModel());
         }
     }
 

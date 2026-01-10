@@ -12,16 +12,22 @@ jwt:
   refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000}
   issuer: ${JWT_ISSUER:todo-summarized}
 
+# AI Summary Configuration
+# Options AUTO | OPENAI | GEMINI
+ai:
+  enabled: ${AI_ENABLED:true}
+  provider: ${AI_PROVIDER:AUTO}
+
 # OpenAI Configuration
 openai:
-  api-key: ${OPENAI_API_KEY}
-  model: ${OPENAI_MODEL:gpt-4o-mini}
+  api-key: ${OPENAI_API_KEY:}
+  model: ${OPENAI_MODEL:gpt-5-nano}
   enabled: ${OPENAI_ENABLED:true}
   max-tokens: ${OPENAI_MAX_TOKENS:500}
   temperature: ${OPENAI_TEMPERATURE:0.7}
   timeout-seconds: ${OPENAI_TIMEOUT_SECONDS:30}
 
-# Gemini Configuration (alternative to OpenAI)
+# Gemini Configuration
 gemini:
   api-key: ${GEMINI_API_KEY:}
   model: ${GEMINI_MODEL:gemini-2.5-flash-lite}

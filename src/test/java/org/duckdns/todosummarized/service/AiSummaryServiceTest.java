@@ -88,7 +88,7 @@ class AiSummaryServiceTest {
             when(providerSelector.isProviderAvailable(AiProvider.AUTO)).thenReturn(true);
             when(providerSelector.generateSummary(sampleMetrics, SummaryType.DEVELOPER, AiProvider.AUTO))
                     .thenReturn(AiProviderSelector.AiGenerationResult.success(
-                            "AI generated summary text", "gpt-4o-mini", AiProvider.OPENAI));
+                            "AI generated summary text", "gpt-5-nano", AiProvider.OPENAI));
 
             AiSummaryDTO result = aiSummaryService.getAiSummary(user, SummaryType.DEVELOPER);
 
@@ -96,7 +96,7 @@ class AiSummaryServiceTest {
             assertEquals("AI generated summary text", result.summary());
             assertEquals(SummaryType.DEVELOPER, result.summaryType());
             assertEquals("Software Engineer / Developer", result.summaryTypeName());
-            assertEquals("gpt-4o-mini", result.model());
+            assertEquals("gpt-5-nano", result.model());
             assertNull(result.fallbackReason());
             assertNotNull(result.metrics());
         }
@@ -140,7 +140,7 @@ class AiSummaryServiceTest {
             when(providerSelector.isProviderAvailable(AiProvider.AUTO)).thenReturn(true);
             when(providerSelector.generateSummary(any(), any(), any()))
                     .thenReturn(AiProviderSelector.AiGenerationResult.success(
-                            "Summary", "gpt-4o-mini", AiProvider.OPENAI));
+                            "Summary", "gpt-5-nano", AiProvider.OPENAI));
 
             AiSummaryDTO result = aiSummaryService.getAiSummary(user, SummaryType.DEVELOPER);
 

@@ -1,7 +1,9 @@
 package org.duckdns.todosummarized.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.duckdns.todosummarized.config.AiProperties;
 import org.duckdns.todosummarized.domains.enums.AiProvider;
 import org.duckdns.todosummarized.domains.enums.SummaryType;
 import org.duckdns.todosummarized.dto.DailySummaryDTO;
@@ -12,14 +14,25 @@ import java.util.Optional;
 /**
  * Service for selecting and coordinating between multiple AI providers.
  * Supports automatic fallback from one provider to another.
+ * Respects global AI configuration to skip unnecessary provider checks.
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AiProviderSelector {
 
+    private final AiProperties aiProperties;
     private final OpenAiSummaryAdapter openAiAdapter;
     private final GeminiSummaryAdapter geminiAdapter;
+
+    @PostConstruct
+    void logConfiguration() {
+        if (!aiProperties.isEnabled()) {
+            log.info("AI Summary feature is globally DISABLED");
+        } else {
+            log.info("AI Summary feature enabled with preferred provider: {}", aiProperties.getProvider());
+        }
+    }
 
     /**
      * Result of an AI generation attempt, including provider info.
@@ -41,7 +54,8 @@ public class AiProviderSelector {
     }
 
     /**
-     * Generates an AI summary using the specified provider, with automatic fallback if AUTO is selected.
+     * Generates an AI summary using the configured provider.
+     * Uses the global preferred provider setting, but can be overridden.
      *
      * @param metrics         the daily summary metrics
      * @param summaryType     the type of summary to generate
@@ -49,7 +63,19 @@ public class AiProviderSelector {
      * @return the generation result with summary and provider info
      */
     public AiGenerationResult generateSummary(DailySummaryDTO metrics, SummaryType summaryType, AiProvider preferredProvider) {
-        return switch (preferredProvider) {
+        // Check if AI is globally disabled
+        if (!aiProperties.isEnabled()) {
+            return AiGenerationResult.failure("AI-powered summary feature is disabled");
+        }
+
+        // Use global preferred provider if AUTO is passed and global setting is not AUTO
+        AiProvider effectiveProvider = preferredProvider;
+        if (preferredProvider == AiProvider.AUTO && aiProperties.getProvider() != AiProvider.AUTO) {
+            effectiveProvider = aiProperties.getProvider();
+            log.debug("Using globally configured provider: {}", effectiveProvider);
+        }
+
+        return switch (effectiveProvider) {
             case OPENAI -> tryOpenAi(metrics, summaryType);
             case GEMINI -> tryGemini(metrics, summaryType);
             case AUTO -> tryAutoSelect(metrics, summaryType);
@@ -119,20 +145,28 @@ public class AiProviderSelector {
 
     /**
      * Checks if any AI provider is currently available.
+     * Takes into account the global AI enabled setting.
      *
-     * @return true if at least one provider is enabled and configured
+     * @return true if AI is globally enabled and at least one provider is enabled
      */
     public boolean isAnyProviderAvailable() {
+        if (!aiProperties.isEnabled()) {
+            return false;
+        }
         return openAiAdapter.isEnabled() || geminiAdapter.isEnabled();
     }
 
     /**
      * Checks if a specific provider is available.
+     * Takes into account the global AI enabled setting.
      *
      * @param provider the provider to check
      * @return true if the provider is enabled and configured
      */
     public boolean isProviderAvailable(AiProvider provider) {
+        if (!aiProperties.isEnabled()) {
+            return false;
+        }
         return switch (provider) {
             case OPENAI -> openAiAdapter.isEnabled();
             case GEMINI -> geminiAdapter.isEnabled();
@@ -144,8 +178,11 @@ public class AiProviderSelector {
      * Returns the aggregated reason why AI is unavailable.
      */
     public String getAggregatedUnavailableReason() {
+        if (!aiProperties.isEnabled()) {
+            return "AI-powered summary feature is disabled";
+        }
         if (!openAiAdapter.isEnabled() && !geminiAdapter.isEnabled()) {
-            return "All AI providers are disabled";
+            return "All AI providers are disabled. Enable OpenAI or Gemini in configuration.";
         }
         if (!openAiAdapter.isEnabled()) {
             return "OpenAI disabled; Gemini: " + geminiAdapter.getUnavailableReason();
@@ -162,10 +199,29 @@ public class AiProviderSelector {
      * @return array of provider availability info
      */
     public ProviderInfo[] getProviderInfo() {
+        boolean globalEnabled = aiProperties.isEnabled();
         return new ProviderInfo[]{
-                new ProviderInfo(AiProvider.OPENAI, openAiAdapter.isEnabled(), openAiAdapter.getModel()),
-                new ProviderInfo(AiProvider.GEMINI, geminiAdapter.isEnabled(), geminiAdapter.getModel())
+                new ProviderInfo(AiProvider.OPENAI, globalEnabled && openAiAdapter.isEnabled(), openAiAdapter.getModel()),
+                new ProviderInfo(AiProvider.GEMINI, globalEnabled && geminiAdapter.isEnabled(), geminiAdapter.getModel())
         };
+    }
+
+    /**
+     * Gets the globally configured preferred provider.
+     *
+     * @return the configured AI provider preference
+     */
+    public AiProvider getConfiguredProvider() {
+        return aiProperties.getProvider();
+    }
+
+    /**
+     * Checks if AI is globally enabled.
+     *
+     * @return true if AI feature is globally enabled
+     */
+    public boolean isGloballyEnabled() {
+        return aiProperties.isEnabled();
     }
 
     /**
