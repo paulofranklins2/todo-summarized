@@ -95,6 +95,22 @@ const Utils = (() => {
     };
 
     /**
+     * Format markdown text to HTML using marked.js library.
+     */
+    const formatMarkdown = (text) => {
+        if (!text) return '';
+
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            headerIds: false,
+            mangle: false
+        });
+
+        return marked.parse(text);
+    };
+
+    /**
      * Debounce function.
      */
     const debounce = (func, wait) => {
@@ -128,6 +144,7 @@ const Utils = (() => {
         isDueToday,
         getDueIndicator,
         escapeHtml,
+        formatMarkdown,
         debounce,
         setButtonLoading
     };
