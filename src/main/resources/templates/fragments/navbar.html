@@ -13,7 +13,6 @@
         </a>
         <div class="navbar-nav">
             <a th:href="@{/dashboard}" class="nav-link" th:classappend="${currentPage == 'dashboard'} ? 'active' : ''">Dashboard</a>
-            <a th:href="@{/summary}" class="nav-link" th:classappend="${currentPage == 'summary'} ? 'active' : ''">Summary</a>
         </div>
         <div class="navbar-user">
             <span class="user-email" id="userEmail"></span>
@@ -27,7 +26,6 @@
     </div>
     <div class="navbar-menu" id="navbarMenu">
         <a th:href="@{/dashboard}" class="nav-link" th:classappend="${currentPage == 'dashboard'} ? 'active' : ''">Dashboard</a>
-        <a th:href="@{/summary}" class="nav-link" th:classappend="${currentPage == 'summary'} ? 'active' : ''">Summary</a>
         <div class="navbar-user-mobile">
             <span class="user-email" id="userEmailMobile"></span>
             <button class="btn btn-secondary btn-sm" id="logoutBtnMobile">Logout</button>
