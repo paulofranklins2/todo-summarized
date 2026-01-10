@@ -153,7 +153,6 @@
         todoList.innerHTML = sortedTodos.map(todo => {
             const isCompleted = todo.status === 'COMPLETED';
             const isCancelled = todo.status === 'CANCELLED';
-            const dueIndicator = Utils.getDueIndicator(todo.dueDate, todo.status);
 
             return `
                 <div class="todo-item ${isCompleted ? 'completed' : ''}" onclick="openTodoModal('${todo.id}')">
@@ -164,15 +163,12 @@
                         </svg>
                     </div>
                     <div class="todo-content">
-                        <div class="todo-title ${isCompleted ? 'done' : ''}">
-                            ${Utils.escapeHtml(todo.title)}
-                            ${dueIndicator ? `<span class="due-dot ${dueIndicator}"></span>` : ''}
-                        </div>
+                        <div class="todo-title ${isCompleted ? 'done' : ''}">${Utils.escapeHtml(todo.title)}</div>
                         ${todo.description ? `<div class="todo-description">${Utils.escapeHtml(todo.description.substring(0, 60))}${todo.description.length > 60 ? '...' : ''}</div>` : ''}
                     </div>
                     <div class="todo-meta">
                         <span class="badge badge-priority-${todo.priority.toLowerCase()}">${Utils.formatEnumLabel(todo.priority)}</span>
-                        ${todo.dueDate ? `<span class="todo-due ${dueIndicator || ''}">${Utils.formatDate(todo.dueDate)}</span>` : ''}
+                        ${todo.dueDate ? `<span class="todo-due">${Utils.formatDate(todo.dueDate)}</span>` : ''}
                     </div>
                 </div>
             `;

@@ -75,17 +75,6 @@ const Utils = (() => {
     };
 
     /**
-     * Get due indicator class based on due date.
-     * Returns: 'overdue', 'today', 'upcoming', or null
-     */
-    const getDueIndicator = (dueDate, status) => {
-        if (!dueDate || status === 'COMPLETED' || status === 'CANCELLED') return null;
-        if (isOverdue(dueDate, status)) return 'overdue';
-        if (isDueToday(dueDate, status)) return 'today';
-        return 'upcoming';
-    };
-
-    /**
      * Escape HTML to prevent XSS.
      */
     const escapeHtml = (text) => {
@@ -142,7 +131,6 @@ const Utils = (() => {
         formatEnumLabel,
         isOverdue,
         isDueToday,
-        getDueIndicator,
         escapeHtml,
         formatMarkdown,
         debounce,
